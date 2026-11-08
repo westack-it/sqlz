@@ -181,7 +181,7 @@ fn run(
     var transfer = try bootstrap.plan(allocator, &sqlite_catalog, &postgres_catalog, destination_schema);
     defer transfer.deinit();
 
-    const sqlite_path_z = try allocator.dupeZ(u8, sqlite_path);
+    const sqlite_path_z = try allocator.dupeSentinel(u8, sqlite_path, 0);
     defer allocator.free(sqlite_path_z);
     const source = try zqlite.open(sqlite_path_z, zqlite.OpenFlags.ReadOnly | zqlite.OpenFlags.EXResCode);
     defer source.close();

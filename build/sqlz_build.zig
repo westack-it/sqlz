@@ -95,7 +95,6 @@ pub const Tool = struct {
         const generated = run.addOutputFileArg(self.b.fmt("{s}_queries.zig", .{name}));
         if (options.runtime.sqlite) run.addArgs(&.{ "--runtime", "sqlite" });
         if (options.runtime.postgres) run.addArgs(&.{ "--runtime", "postgres" });
-        _ = run.step.addDirectoryWatchInput(options.config.dirname()) catch @panic("out of memory");
         // The tool discovers its own inputs — migrations, `.sql` files, and the
         // Zig roots — so the config file alone is not what the result depends
         // on. Register every candidate input, or an edited query would keep a
@@ -151,11 +150,19 @@ pub fn addProjectInputs(b: *std.Build, run: *std.Build.Step.Run, config: std.Bui
         .src_path => |src| std.fs.path.dirname(src.sub_path) orelse ".",
         else => return,
     };
-    var directory = b.build_root.handle.openDir(b.graph.io, root, .{ .iterate = true }) catch return;
+    const root_path = b.root.join(b.allocator, root) catch @panic("out of memory");
+    var directory = root_path.root_dir.handle.openDir(b.graph.io, root_path.sub_path, .{ .iterate = true }) catch return;
     defer directory.close(b.graph.io);
     var walker = directory.walk(b.allocator) catch @panic("out of memory");
     defer walker.deinit();
+    // Configure results are cached, so the walk must be repeated whenever a
+    // visited directory gains or loses an entry.
+    b.dependOnDirectoryContents(b.path(root));
     while (walker.next(b.graph.io) catch return) |entry| {
+        if (entry.kind == .directory and !skipPath(entry.path)) {
+            b.dependOnDirectoryContents(b.path(b.pathJoin(&.{ root, entry.path })));
+            continue;
+        }
         if ((entry.kind != .file and entry.kind != .sym_link) or
             skipPath(entry.path) or !checkerInput(entry.basename)) continue;
         run.addFileInput(b.path(b.pathJoin(&.{ root, entry.path })));
@@ -184,7 +191,7 @@ pub fn addTool(b: *std.Build, options: ToolOptions) *Tool {
     cli_run.setName("run sqlz command");
     cli_run.setCwd(b.path("."));
     cli_run.stdio = .inherit;
-    if (b.args) |args| cli_run.addArgs(args);
+    cli_run.addPassthruArgs();
     cli_run.addArg("--sqlz-build-registrations");
     const cli_step = b.step("sqlz", "Run a sqlz project command");
     cli_step.dependOn(&cli_run.step);

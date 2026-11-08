@@ -284,7 +284,7 @@ test "deep Zig nesting fails closed before the Zig parser runs" {
         try source.appendSlice(allocator, middle);
         for (0..100_000) |_| try source.appendSlice(allocator, close);
         try source.appendSlice(allocator, ";");
-        const terminated = try allocator.dupeZ(u8, source.items);
+        const terminated = try allocator.dupeSentinel(u8, source.items, 0);
         defer allocator.free(terminated);
         try std.testing.expectError(error.NestingLimitExceeded, zig_queries.parse(allocator, "deep.zig", terminated));
     }
@@ -300,7 +300,7 @@ test "deep Zig statement nesting fails closed before the Zig parser runs" {
         try source.appendSlice(allocator, "fn f() void { ");
         for (0..100_000) |_| try source.appendSlice(allocator, unit);
         try source.appendSlice(allocator, "{} }");
-        const terminated = try allocator.dupeZ(u8, source.items);
+        const terminated = try allocator.dupeSentinel(u8, source.items, 0);
         defer allocator.free(terminated);
         try std.testing.expectError(error.NestingLimitExceeded, zig_queries.parse(allocator, "deep.zig", terminated));
     }
@@ -310,7 +310,7 @@ test "deep Zig statement nesting fails closed before the Zig parser runs" {
 /// it never panics, and a found declaration's offsets stay inside the file.
 fn checkZigProperties(bytes: []const u8) !void {
     const allocator = std.testing.allocator;
-    const source = try allocator.dupeZ(u8, bytes);
+    const source = try allocator.dupeSentinel(u8, bytes, 0);
     defer allocator.free(source);
     var discovery = zig_queries.parseWithLimits(allocator, "fuzz.zig", source, .{ .nesting = 64, .tokens = 4096 }) catch return;
     defer discovery.deinit();

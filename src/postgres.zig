@@ -662,8 +662,9 @@ pub const postgres = struct {
 
     fn decodeRow(comptime Row: type, native: *const pg.QueryRow, allocator: std.mem.Allocator) !Row {
         var value: Row = undefined;
-        inline for (@typeInfo(Row).@"struct".fields, 0..) |field, index|
-            @field(value, field.name) = try decodeField(field.type, native, index, allocator);
+        const info = @typeInfo(Row).@"struct";
+        inline for (info.field_names, info.field_types, 0..) |name, Field, index|
+            @field(value, name) = try decodeField(Field, native, index, allocator);
         return value;
     }
 
@@ -674,8 +675,9 @@ pub const postgres = struct {
 
     fn decodePgRow(comptime Row: type, native: *const pg.Row, allocator: std.mem.Allocator) !Row {
         var value: Row = undefined;
-        inline for (@typeInfo(Row).@"struct".fields, 0..) |field, index|
-            @field(value, field.name) = try decodeField(field.type, native, index, allocator);
+        const info = @typeInfo(Row).@"struct";
+        inline for (info.field_names, info.field_types, 0..) |name, Field, index|
+            @field(value, name) = try decodeField(Field, native, index, allocator);
         return value;
     }
 
@@ -770,17 +772,17 @@ pub const postgres = struct {
 
     fn positionalArgs(allocator: std.mem.Allocator, args: anytype) !PositionalArgs(@TypeOf(args)) {
         const Args = @TypeOf(args);
-        const fields = @typeInfo(Args).@"struct".fields;
+        const info = @typeInfo(Args).@"struct";
         var result: PositionalArgs(Args) = undefined;
-        inline for (fields, 0..) |field, index|
-            result[index] = try lowerValue(allocator, field.type, @field(args, field.name));
+        inline for (info.field_names, info.field_types, 0..) |name, Field, index|
+            result[index] = try lowerValue(allocator, Field, @field(args, name));
         return result;
     }
 
     fn PositionalArgs(comptime Args: type) type {
-        const fields = @typeInfo(Args).@"struct".fields;
-        var types: [fields.len]type = undefined;
-        for (fields, &types) |field, *T| T.* = LowerType(field.type);
+        const field_types = @typeInfo(Args).@"struct".field_types;
+        var types: [field_types.len]type = undefined;
+        for (field_types, &types) |Field, *T| T.* = LowerType(Field);
         return @Tuple(&types);
     }
 
@@ -802,7 +804,7 @@ pub const postgres = struct {
     fn lowerValue(allocator: std.mem.Allocator, comptime T: type, value: T) !LowerType(T) {
         return switch (@typeInfo(T)) {
             .@"enum" => switch (comptime core.enumStorage(T)) {
-                .integer => @intFromEnum(value),
+                .integer => @backingInt(value),
                 .text => @tagName(value),
             },
             .optional => |optional| if (value) |inner| try lowerValue(allocator, optional.child, inner) else null,

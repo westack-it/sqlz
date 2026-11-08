@@ -47,7 +47,7 @@ pub fn parseWithLimits(
     limits: Limits,
 ) (Error || LimitError)!Discovery {
     if (checkLimits(contents, limits)) |violation| return violation.err;
-    var tree = try std.zig.Ast.parse(allocator, contents, .zig);
+    var tree = try std.zig.Ast.parse(allocator, contents, .{});
     defer tree.deinit(allocator);
     if (tree.errors.len != 0) return error.InvalidZig;
 
@@ -98,7 +98,7 @@ pub fn discover(
     for (paths.items) |path| {
         const contents = try project_inputs.readFile(allocator, root, path);
         defer allocator.free(contents);
-        const terminated = try allocator.dupeZ(u8, contents);
+        const terminated = try allocator.dupeSentinel(u8, contents, 0);
         defer allocator.free(terminated);
         if (checkLimits(terminated, limits)) |violation| {
             try project_inputs.failInside(root, path, contents, violation.start, violation.end);
@@ -267,7 +267,7 @@ fn resolveContainer(tree: *const std.zig.Ast, node: std.zig.Ast.Node.Index) ?std
     const wanted = tree.tokenSlice(tree.nodeMainToken(node));
     var index: u32 = 0;
     while (index < tree.nodes.len) : (index += 1) {
-        const candidate: std.zig.Ast.Node.Index = @enumFromInt(index);
+        const candidate: std.zig.Ast.Node.Index = @fromBackingInt(@intCast(index));
         const declaration = tree.fullVarDecl(candidate) orelse continue;
         if (!std.mem.eql(u8, tree.tokenSlice(declaration.ast.mut_token + 1), wanted)) continue;
         const init = declaration.ast.init_node.unwrap() orelse continue;
@@ -502,7 +502,7 @@ pub fn checkLimits(contents: [:0]const u8, limits: Limits) ?Violation {
         if (tokens > limits.tokens)
             return .{ .err = error.TokenLimitExceeded, .start = token.loc.start, .end = token.loc.end };
         switch (token.tag) {
-            .bang, .minus, .minus_percent, .tilde, .ampersand, .asterisk, .asterisk_asterisk, .question_mark, .keyword_try, .keyword_comptime, .keyword_nosuspend => current.operands += 1,
+            .bang, .minus, .minus_percent, .tilde, .ampersand, .asterisk, .question_mark, .keyword_try, .keyword_comptime, .keyword_nosuspend => current.operands += 1,
             .comma, .equal, .equal_angle_bracket_right => current.operands = 0,
             .semicolon => current = .{ .operands = 0, .chain = 0 },
             .keyword_if => if (previous == .keyword_else) {

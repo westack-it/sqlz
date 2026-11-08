@@ -41,7 +41,7 @@ pub const Config = struct {
     zig_roots: []const []const u8,
     backends: Backends,
     catalog_supplements: []const []const u8 = &.{},
-    codecs: ziggy.Dictionary(Codec) = .{},
+    codecs: ziggy.Dictionary(Codec) = .empty_struct,
     limits: Limits = .{},
     migration_lock_timeout_ms: u32 = 30_000,
     warnings_as_errors: bool = false,
@@ -61,6 +61,7 @@ pub const ValidationError = error{
     InvalidCodecId,
     MissingCodecPatterns,
     UnsupportedCatalogSupplements,
+    InvalidUtf8,
 };
 
 pub const Error = ziggy.Deserializer.Error || ValidationError;
@@ -142,13 +143,16 @@ pub fn parse(
     source: [:0]const u8,
     meta: *ziggy.Deserializer.Meta,
 ) Error!Loaded {
+    // Ziggy's tokenizer reads past the end of a string that stops inside a
+    // multi-byte sequence, so it only ever sees valid UTF-8.
+    if (source_manager.invalidUtf8Offset(source) != null) return error.InvalidUtf8;
     var arena: std.heap.ArenaAllocator = .init(allocator);
     errdefer arena.deinit();
     // Dictionary keys borrow the source even with `copy_strings`, so the
     // loaded value keeps its own copy instead of the caller's buffer.
     // A byte order mark becomes whitespace, keeping every reported offset an
     // offset into the original file.
-    const owned_source = try arena.allocator().dupeZ(u8, source);
+    const owned_source = try arena.allocator().dupeSentinel(u8, source, 0);
     @memset(owned_source[0..source_manager.bomLength(owned_source)], ' ');
     const value = try ziggy.deserializeLeaky(Config, arena.allocator(), owned_source, meta, .{
         .copy_strings = .always,
@@ -171,8 +175,7 @@ pub fn load(
         else => return err,
     };
     defer allocator.free(raw);
-    if (source_manager.invalidUtf8Offset(raw) != null) return error.InvalidUtf8;
-    const source = try allocator.dupeZ(u8, raw);
+    const source = try allocator.dupeSentinel(u8, raw, 0);
     defer allocator.free(source);
     var meta: ziggy.Deserializer.Meta = .init;
     return parse(allocator, source, &meta);

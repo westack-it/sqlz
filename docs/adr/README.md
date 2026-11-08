@@ -53,3 +53,4 @@ be replaced only by a new ADR. Records use [0000-template.md](0000-template.md).
 | [0040](0040-postgresql-runtime-version-policy.md) | PostgreSQL runtime version policy | Accepted |
 | [0041](0041-migration-manifest-and-graph-diagnostics.md) | Migration manifest and graph diagnostics | Accepted |
 | [0042](0042-backend-selection-ownership.md) | Backend selection ownership | Accepted |
+| [0043](0043-zig-0-17-toolchain-and-dependency-pins.md) | Zig 0.17 toolchain and dependency pins | Accepted |

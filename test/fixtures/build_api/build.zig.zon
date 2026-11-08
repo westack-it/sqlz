@@ -4,7 +4,7 @@
     .dependencies = .{
         .sqlz_build = .{ .path = "../../.." },
     },
-    .minimum_zig_version = "0.16.0",
+    .minimum_zig_version = "0.17.0",
     .paths = .{""},
     .fingerprint = 0xe4c7e29caa85f4d,
 }

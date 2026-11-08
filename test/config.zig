@@ -13,7 +13,7 @@ const valid =
 
 test "loads a complete project configuration with defaults" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const source = try std.testing.allocator.dupeZ(u8, valid);
+    const source = try std.testing.allocator.dupeSentinel(u8, valid, 0);
     defer std.testing.allocator.free(source);
     var loaded = try config.parse(std.testing.allocator, source, &meta);
     defer loaded.deinit();
@@ -29,14 +29,14 @@ test "loads a complete project configuration with defaults" {
 
 test "Ziggy rejects unknown and duplicate fields" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const unknown = try std.testing.allocator.dupeZ(u8, valid ++ ".typo = true,\n");
+    const unknown = try std.testing.allocator.dupeSentinel(u8, valid ++ ".typo = true,\n", 0);
     defer std.testing.allocator.free(unknown);
     try std.testing.expectError(
         error.UnknownField,
         config.parse(std.testing.allocator, unknown, &meta),
     );
 
-    const duplicate = try std.testing.allocator.dupeZ(u8, valid ++ ".format_version = 1,\n");
+    const duplicate = try std.testing.allocator.dupeSentinel(u8, valid ++ ".format_version = 1,\n", 0);
     defer std.testing.allocator.free(duplicate);
     try std.testing.expectError(
         error.DuplicateField,
@@ -54,7 +54,7 @@ test "semantic validation rejects unsafe project configuration" {
         "550e8400-e29b-11d4-a716-446655440000",
     );
     defer std.testing.allocator.free(replaced);
-    const bad_uuid = try std.testing.allocator.dupeZ(u8, replaced);
+    const bad_uuid = try std.testing.allocator.dupeSentinel(u8, replaced, 0);
     defer std.testing.allocator.free(bad_uuid);
     try std.testing.expectError(
         error.InvalidProjectId,
@@ -72,7 +72,7 @@ test "rejects unknown SQLite capability manifests" {
         ".{ .profile = \"3.53\", .capabilities = \"custom\" }",
     );
     defer std.testing.allocator.free(replaced);
-    const source = try std.testing.allocator.dupeZ(u8, replaced);
+    const source = try std.testing.allocator.dupeSentinel(u8, replaced, 0);
     defer std.testing.allocator.free(source);
     try std.testing.expectError(
         error.UnsupportedSqliteCapabilities,
@@ -80,12 +80,23 @@ test "rejects unknown SQLite capability manifests" {
     );
 }
 
+test "a string that stops inside a multi-byte sequence is invalid UTF-8" {
+    var meta: ziggy.Deserializer.Meta = .init;
+    const source = try std.testing.allocator.dupeSentinel(u8, valid ++ ".typo = \"\xE2", 0);
+    defer std.testing.allocator.free(source);
+    try std.testing.expectError(
+        error.InvalidUtf8,
+        config.parse(std.testing.allocator, source, &meta),
+    );
+}
+
 test "codec entries need an identifier ID and a database pattern" {
     var meta: ziggy.Deserializer.Meta = .init;
 
-    const registered = try std.testing.allocator.dupeZ(
+    const registered = try std.testing.allocator.dupeSentinel(
         u8,
         valid ++ ".codecs = .{ .user_id = .{ .sqlite_types = [\"BLOB\"] } },\n",
+        0,
     );
     defer std.testing.allocator.free(registered);
     var loaded = try config.parse(std.testing.allocator, registered, &meta);
@@ -95,9 +106,10 @@ test "codec entries need an identifier ID and a database pattern" {
         loaded.config().codecs.fields.get("user_id").?.sqlite_types[0],
     );
 
-    const patternless = try std.testing.allocator.dupeZ(
+    const patternless = try std.testing.allocator.dupeSentinel(
         u8,
         valid ++ ".codecs = .{ .user_id = .{ .sqlite_types = [], .postgres_types = [] } },\n",
+        0,
     );
     defer std.testing.allocator.free(patternless);
     try std.testing.expectError(
@@ -117,19 +129,22 @@ test "the project root is a valid source root, unlike a dot component" {
         \\.zig_roots = ["."],
         \\.backends = .{ .sqlite = .{ .profile = "3.53" } },
     ;
-    const accepted = try std.testing.allocator.dupeZ(u8, only_root);
+    const accepted = try std.testing.allocator.dupeSentinel(u8, only_root, 0);
     defer std.testing.allocator.free(accepted);
     var loaded = try config.parse(std.testing.allocator, accepted, &meta);
     defer loaded.deinit();
     try std.testing.expectEqualStrings(".", loaded.config().zig_roots[0]);
 
-    const unnormalized = try std.testing.allocator.dupeZ(u8,
+    const unnormalized = try std.testing.allocator.dupeSentinel(
+        u8,
         \\.format_version = 1,
         \\.project_id = "550e8400-e29b-41d4-a716-446655440000",
         \\.migrations = "migrations",
         \\.sql_roots = .{ .app = "queries" },
         \\.zig_roots = ["src/./queries"],
         \\.backends = .{ .sqlite = .{ .profile = "3.53" } },
+    ,
+        0,
     );
     defer std.testing.allocator.free(unnormalized);
     try std.testing.expectError(
@@ -140,9 +155,10 @@ test "the project root is a valid source root, unlike a dot component" {
 
 test "catalog supplements are rejected until they are loaded" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const source = try std.testing.allocator.dupeZ(
+    const source = try std.testing.allocator.dupeSentinel(
         u8,
         valid ++ ".catalog_supplements = [\"sqlz/catalog.ziggy\"],\n",
+        0,
     );
     defer std.testing.allocator.free(source);
     try std.testing.expectError(
@@ -164,7 +180,7 @@ test "root aliases may not use the generated module's reserved prefix" {
             replacement,
         );
         defer std.testing.allocator.free(replaced);
-        const source = try std.testing.allocator.dupeZ(u8, replaced);
+        const source = try std.testing.allocator.dupeSentinel(u8, replaced, 0);
         defer std.testing.allocator.free(source);
         try std.testing.expectError(
             error.InvalidSqlRootAlias,
@@ -175,7 +191,7 @@ test "root aliases may not use the generated module's reserved prefix" {
 
 test "the loaded value outlives the caller's source buffer" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const source = try std.testing.allocator.dupeZ(u8, valid);
+    const source = try std.testing.allocator.dupeSentinel(u8, valid, 0);
     var loaded = config.parse(std.testing.allocator, source, &meta) catch |err| {
         std.testing.allocator.free(source);
         return err;
@@ -197,8 +213,8 @@ test "every format-1 field has exactly one documented use" {
     };
     var expected: usize = 0;
     inline for (nested) |entry| {
-        inline for (@typeInfo(entry[1]).@"struct".fields) |field| {
-            const name = entry[0] ++ field.name;
+        inline for (@typeInfo(entry[1]).@"struct".field_names) |field_name| {
+            const name = entry[0] ++ field_name;
             var matches: usize = 0;
             for (config.field_usage) |usage| {
                 if (std.mem.eql(u8, usage.field, name)) matches += 1;
@@ -219,7 +235,7 @@ fn parseWithLimits(limits: []const u8) !config.Loaded {
     var meta: ziggy.Deserializer.Meta = .init;
     const text = try std.fmt.allocPrint(std.testing.allocator, "{s}\n.limits = .{{ {s} }},\n", .{ valid, limits });
     defer std.testing.allocator.free(text);
-    const source = try std.testing.allocator.dupeZ(u8, text);
+    const source = try std.testing.allocator.dupeSentinel(u8, text, 0);
     defer std.testing.allocator.free(source);
     return config.parse(std.testing.allocator, source, &meta);
 }
@@ -234,7 +250,7 @@ test "nesting_depth is bounded by the largest depth the parsers accept" {
 
 test "a configuration may start with a byte order mark" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const source = try std.testing.allocator.dupeZ(u8, "\xEF\xBB\xBF" ++ valid);
+    const source = try std.testing.allocator.dupeSentinel(u8, "\xEF\xBB\xBF" ++ valid, 0);
     defer std.testing.allocator.free(source);
     var loaded = try config.parse(std.testing.allocator, source, &meta);
     defer loaded.deinit();

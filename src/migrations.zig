@@ -37,6 +37,7 @@ pub const ManifestValidationError = error{
     MissingTransactionPolicy,
     UnexpectedTransactionPolicy,
     UnsupportedSqliteTransaction,
+    InvalidUtf8,
 };
 
 pub const ManifestError = ziggy.Deserializer.Error || ManifestValidationError;
@@ -135,6 +136,9 @@ pub fn parseManifest(
     source: [:0]const u8,
     meta: *ziggy.Deserializer.Meta,
 ) ManifestError!LoadedManifest {
+    // Ziggy's tokenizer reads past the end of a string that stops inside a
+    // multi-byte sequence, so it only ever sees valid UTF-8.
+    if (source_manager.invalidUtf8Offset(source) != null) return error.InvalidUtf8;
     var arena: std.heap.ArenaAllocator = .init(allocator);
     errdefer arena.deinit();
     const value = try ziggy.deserializeLeaky(Manifest, arena.allocator(), try maskBom(arena.allocator(), source), meta, .{
@@ -152,7 +156,7 @@ pub fn parseManifest(
 /// the deserializer sees plain whitespace and every offset it reports is an
 /// offset into the original file.
 pub fn maskBom(allocator: std.mem.Allocator, source: [:0]const u8) std.mem.Allocator.Error![:0]u8 {
-    const copy = try allocator.dupeZ(u8, source);
+    const copy = try allocator.dupeSentinel(u8, source, 0);
     @memset(copy[0..source_manager.bomLength(copy)], ' ');
     return copy;
 }
@@ -256,7 +260,7 @@ fn discoverImpl(
         defer directory.close(io);
         const raw_manifest = try project_inputs.readFile(allocator, directory, "revision.ziggy");
         defer allocator.free(raw_manifest);
-        const manifest_source = try allocator.dupeZ(u8, raw_manifest);
+        const manifest_source = try allocator.dupeSentinel(u8, raw_manifest, 0);
         defer allocator.free(manifest_source);
         var meta: ziggy.Deserializer.Meta = .init;
         var loaded = parseManifest(allocator, manifest_source, &meta) catch |err| {

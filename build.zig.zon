@@ -3,30 +3,30 @@
     .version = "0.0.1",
     .dependencies = .{
         .ziggy = .{
-            .url = "git+https://github.com/kristoff-it/ziggy.git#0b61581980d6905dd4108a618d602f5778593122",
-            .hash = "ziggy-0.1.0-kTg8v0NWBgAyFtS5awtOlKnC7ddvefR_I0Xh3XQyi7p1",
+            .url = "git+https://github.com/kristoff-it/ziggy.git#7fc62a537ba3e3a84287025b5b794e0cfaadef2f",
+            .hash = "ziggy-0.3.0-kTg8v_OsCAAdLrIXVYVI-z4bNEm5bBy_m13uu4Uy_2mb",
         },
         .libpg_query_source = .{
             .url = "git+https://github.com/pganalyze/libpg_query.git#204fbdbd3ed5f8691ab358e49f1fc5397b4679e2",
             .hash = "N-V-__8AABam8AGXKt6JaO4YJhtbE2eALOH3ykvUnCh-FnLG",
         },
         .zqlite = .{
-            .url = "git+https://github.com/karlseguin/zqlite.zig.git#b519eea9b1a2b5fcad68af6d0629e717e8746684",
-            .hash = "zqlite-0.0.1-RWLaY8M8nAB4m0tlSpT9A5PGUwX_JfWC5VlPjLe7lG2Q",
+            .url = "git+https://github.com/karlseguin/zqlite.zig.git#865223b734a5113f731ab1eb1d7d81c8ac252913",
+            .hash = "zqlite-0.0.1-RWLaY4Y8nADz2l5aBE-JVyDyM3sZzHjq0agNykuVZKqQ",
             .lazy = true,
         },
         .pg = .{
-            .url = "git+https://github.com/karlseguin/pg.zig.git#f6442abf3fb0bbcf1007fac4799607f35688a89e",
-            .hash = "pg-0.0.0-Wp_7gVzCBgDIFbqjSA6I7bJQj0gh66KzpmDxvx1Nn4PV",
+            .url = "git+https://github.com/karlseguin/pg.zig.git#a9fb17023e2f534dd1712628c80eaa9a551473a5",
+            .hash = "pg-0.0.0-Wp_7gRJyBwC7ca9P685_O1w7RLoLXAdYpDMgHEmkDJpM",
             .lazy = true,
         },
         .zio = .{
-            .url = "git+https://github.com/lalinsky/zio?ref=v0.17.0#9711d68104946a457f151776000210d8adca3f3e",
-            .hash = "zio-0.17.0-xHbVVI_jJQC3YbgU7JydwAV7MuASkOTd73YqBaKlFFUz",
+            .url = "git+https://github.com/lalinsky/zio#299a618b6a53607abcf360d8256dd1e86e9a6cdd",
+            .hash = "zio-0.19.0-xHbVVI4kLwCDQRgFZre6XZuVtCzXLIpO3Yeeb_ZgJNIU",
             .lazy = true,
         },
     },
-    .minimum_zig_version = "0.16.0",
+    .minimum_zig_version = "0.17.0",
     .paths = .{""},
     .fingerprint = 0x74656e80c2910b59,
 }

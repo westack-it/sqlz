@@ -100,7 +100,7 @@ pub fn build(b: *std.Build) !void {
     // even the largest accepted limit far inside the stack.
     const libpg_query_mod = b.createModule(.{
         .target = host_target,
-        .optimize = .ReleaseFast,
+        .optimize = .fast,
         .link_libc = true,
     });
     libpg_query_mod.addIncludePath(libpg_query_root);
@@ -119,7 +119,8 @@ pub fn build(b: *std.Build) !void {
     // libpg_query's pg_config.h assumes a declared strlcpy, which glibc has
     // only from 2.38 (Debian 12 ships 2.36). Supply one on older hosts.
     if (glibcLacksStrlcpy(host_target.result)) {
-        try libpg_query_flags.appendSlice(b.allocator, &.{ "-include", b.pathFromRoot("src/c/strlcpy_compat.h") });
+        libpg_query_mod.addIncludePath(b.path("src/c"));
+        try libpg_query_flags.appendSlice(b.allocator, &.{ "-include", "strlcpy_compat.h" });
         libpg_query_mod.addCSourceFile(.{ .file = b.path("src/c/strlcpy_compat.c") });
     }
     libpg_query_mod.addCSourceFiles(.{
@@ -689,7 +690,6 @@ pub fn build(b: *std.Build) !void {
     const run_codegen = b.addRunArtifact(codegen_exe);
     run_codegen.addFileArg(b.path("test/fixtures/codegen/sqlz.ziggy"));
     const generated_queries = run_codegen.addOutputFileArg("fixture_queries.zig");
-    _ = try run_codegen.step.addDirectoryWatchInput(b.path("test/fixtures/codegen"));
     sqlz_build.addProjectInputs(b, run_codegen, b.path("test/fixtures/codegen/sqlz.ziggy"));
     const generated_module = b.createModule(.{
         .root_source_file = generated_queries,
@@ -726,7 +726,6 @@ pub fn build(b: *std.Build) !void {
         });
         const run_zio_host = b.addRunArtifact(zio_host_tests);
         run_zio_host.setCwd(b.path("."));
-        _ = try run_zio_host.step.addDirectoryWatchInput(b.path("test/fixtures/codegen"));
         test_step.dependOn(&run_zio_host.step);
         const zio_host_step = b.step("test-zio-host", "Run the zio host-pipeline tests");
         zio_host_step.dependOn(&run_zio_host.step);
@@ -841,7 +840,6 @@ pub fn build(b: *std.Build) !void {
         run_example_codegen.addFileArg(b.path("examples/sqlz.ziggy"));
         const example_queries_path = run_example_codegen.addOutputFileArg("example_queries.zig");
         run_example_codegen.addArgs(&.{ "--codec", "tier", "sqlz_codec_tier", "Tier" });
-        _ = try run_example_codegen.step.addDirectoryWatchInput(b.path("examples"));
         sqlz_build.addProjectInputs(b, run_example_codegen, b.path("examples/sqlz.ziggy"));
         const example_queries_mod = b.createModule(.{
             .root_source_file = example_queries_path,
@@ -962,12 +960,12 @@ pub fn build(b: *std.Build) !void {
             bootstrap_integration_options.addOption(
                 []const u8,
                 "fixture_path",
-                b.pathFromRoot("test/fixtures/bootstrap"),
+                try b.root.joinString(b.allocator, "test/fixtures/bootstrap"),
             );
             bootstrap_integration_options.addOption(
                 []const u8,
                 "source_sql_path",
-                b.pathFromRoot("test/fixtures/bootstrap/source.sql"),
+                try b.root.joinString(b.allocator, "test/fixtures/bootstrap/source.sql"),
             );
             const bootstrap_integration_tests = b.addTest(.{
                 .root_module = b.createModule(.{

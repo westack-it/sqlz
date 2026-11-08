@@ -2,7 +2,7 @@
 
 ## Toolchain and engines
 
-sqlz 0.1 guarantees exactly Zig 0.16.0. Other Zig releases may work but are not a
+sqlz 0.1 guarantees exactly Zig 0.17.0. Other Zig releases may work but are not a
 compatibility promise. Supported database profiles are SQLite 3.45–3.53 and
 PostgreSQL 15–18. Defaults are SQLite 3.53 and PostgreSQL 15 compatibility.
 
@@ -17,8 +17,8 @@ sqlz depends on the interface, not on a runtime. The test
 suite runs against `std.Io.Threaded` throughout, and `zig build test-zio` and
 `zig build test-zio-host` repeat runtime and host coverage against
 [zio](https://github.com/lalinsky/zio) to keep a third-party implementation
-honest. `std.Io.Evented` is not claimed for 0.16.0: on macOS it resolves to
-`std.Io.Dispatch`, whose `deinit` does not compile in that release.
+honest. `std.Io.Evented` is not claimed for 0.17.0: on macOS it resolves to
+`std.Io.Dispatch`, whose `init` does not compile in that release.
 
 Profiles govern accepted syntax and offline catalogs. Runtime version checks reject
 older engines and, by default, versions newer than the tested range. The explicit

@@ -117,7 +117,7 @@ pub const sqlite = struct {
         /// is the unchecked path — it keeps a script inside sqlz rather than
         /// sending applications to the driver handle for their own DDL.
         pub fn executeScript(self: *Conn, sql: []const u8) Result(void) {
-            const script = self.allocator.dupeZ(u8, sql) catch
+            const script = self.allocator.dupeSentinel(u8, sql, 0) catch
                 return .{ .err = staticError(.other, .execute, "unable to allocate script text") };
             defer self.allocator.free(script);
             var message: [*c]u8 = null;
@@ -281,7 +281,7 @@ pub const sqlite = struct {
     /// such as zio); it is stored on the connection rather than passed per
     /// call so generated bindings keep a single executor argument.
     pub fn open(allocator: std.mem.Allocator, io: std.Io, path: []const u8, options: OpenOptions) !Conn {
-        const path_z = try allocator.dupeZ(u8, path);
+        const path_z = try allocator.dupeSentinel(u8, path, 0);
         defer allocator.free(path_z);
         const conn = try zqlite.open(path_z.ptr, openFlags(options));
         errdefer conn.close();
@@ -314,7 +314,7 @@ pub const sqlite = struct {
         options_context: *OpenOptions,
 
         pub fn init(allocator: std.mem.Allocator, io: std.Io, path: []const u8, options: PoolOptions) !Pool {
-            const path_z = try allocator.dupeZ(u8, path);
+            const path_z = try allocator.dupeSentinel(u8, path, 0);
             defer allocator.free(path_z);
             const stored = try allocator.create(OpenOptions);
             errdefer allocator.destroy(stored);
@@ -696,8 +696,9 @@ pub const sqlite = struct {
 
     fn decodeRow(comptime Row: type, native: zqlite.Row) DecodeError!Row {
         var value: Row = undefined;
-        inline for (@typeInfo(Row).@"struct".fields, 0..) |field, index| {
-            @field(value, field.name) = try decodeField(field.type, native, index);
+        const info = @typeInfo(Row).@"struct";
+        inline for (info.field_names, info.field_types, 0..) |name, Field, index| {
+            @field(value, name) = try decodeField(Field, native, index);
         }
         return value;
     }

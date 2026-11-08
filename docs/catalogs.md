@@ -27,6 +27,6 @@ cache key and semantic configuration fingerprint.
 
 ## Ziggy dependency
 
-sqlz pins Ziggy commit `0b61581980d6905dd4108a618d602f5778593122`, verified
-with Zig 0.16.0. Updating that pin requires format fixture tests and an ADR when it
+sqlz pins Ziggy v0.3.0, commit `7fc62a537ba3e3a84287025b5b794e0cfaadef2f`, verified
+with Zig 0.17.0 ([ADR 0043](adr/0043-zig-0-17-toolchain-and-dependency-pins.md)). Updating that pin requires format fixture tests and an ADR when it
 changes persisted syntax or compatibility.

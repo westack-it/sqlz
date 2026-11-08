@@ -68,7 +68,7 @@ test "rejects missing parents cycles and multiple heads" {
 
 test "parses and validates a strict revision manifest" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const source = try std.testing.allocator.dupeZ(u8, valid_manifest);
+    const source = try std.testing.allocator.dupeSentinel(u8, valid_manifest, 0);
     defer std.testing.allocator.free(source);
     var loaded = try migrations.parseManifest(std.testing.allocator, source, &meta);
     defer loaded.deinit();
@@ -87,7 +87,7 @@ test "rejects incomplete or invalid revision policies" {
         ".sqlite = .never",
     );
     defer std.testing.allocator.free(never_sqlite);
-    const source = try std.testing.allocator.dupeZ(u8, never_sqlite);
+    const source = try std.testing.allocator.dupeSentinel(u8, never_sqlite, 0);
     defer std.testing.allocator.free(source);
     try std.testing.expectError(
         error.UnsupportedSqliteTransaction,
@@ -102,7 +102,7 @@ test "rejects incomplete or invalid revision policies" {
         "[.sqlite, .sqlite]",
     );
     defer std.testing.allocator.free(duplicate_backend);
-    const duplicate_source = try std.testing.allocator.dupeZ(u8, duplicate_backend);
+    const duplicate_source = try std.testing.allocator.dupeSentinel(u8, duplicate_backend, 0);
     defer std.testing.allocator.free(duplicate_source);
     try std.testing.expectError(
         error.DuplicateBackend,
@@ -484,7 +484,7 @@ test "migration graph diagnostics label missing parents and multiple heads" {
 
 test "a manifest may start with a byte order mark" {
     var meta: ziggy.Deserializer.Meta = .init;
-    const source = try std.testing.allocator.dupeZ(u8, "\xEF\xBB\xBF" ++ valid_manifest);
+    const source = try std.testing.allocator.dupeSentinel(u8, "\xEF\xBB\xBF" ++ valid_manifest, 0);
     defer std.testing.allocator.free(source);
     var loaded = try migrations.parseManifest(std.testing.allocator, source, &meta);
     defer loaded.deinit();
@@ -502,11 +502,21 @@ test "migration SQL sent to a database drops only the byte order mark" {
 /// failure always yields a diagnostic inside the source.
 fn checkManifestProperties(bytes: []const u8) !void {
     const allocator = std.testing.allocator;
-    const source = try allocator.dupeZ(u8, bytes);
+    const source = try allocator.dupeSentinel(u8, bytes, 0);
     defer allocator.free(source);
     var meta: ziggy.Deserializer.Meta = .init;
     var loaded = migrations.parseManifest(allocator, source, &meta) catch return;
     loaded.deinit();
+}
+
+test "a manifest string that stops inside a multi-byte sequence is invalid UTF-8" {
+    var meta: ziggy.Deserializer.Meta = .init;
+    const source = try std.testing.allocator.dupeSentinel(u8, ".description = \"\xE2", 0);
+    defer std.testing.allocator.free(source);
+    try std.testing.expectError(
+        error.InvalidUtf8,
+        migrations.parseManifest(std.testing.allocator, source, &meta),
+    );
 }
 
 const manifest_corpus = [_][]const u8{

@@ -28,9 +28,9 @@ test "deterministically emits parseable Zig for a checked named query" {
     defer std.testing.allocator.free(generated);
     try std.testing.expect(std.mem.indexOf(u8, generated, "id: i64") != null);
     try std.testing.expect(std.mem.indexOf(u8, generated, "name: []const u8") != null);
-    const terminated = try std.testing.allocator.dupeZ(u8, generated);
+    const terminated = try std.testing.allocator.dupeSentinel(u8, generated, 0);
     defer std.testing.allocator.free(terminated);
-    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .zig);
+    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .{});
     defer ast.deinit(std.testing.allocator);
     try std.testing.expectEqual(@as(usize, 0), ast.errors.len);
 
@@ -62,9 +62,9 @@ test "emits a PostgreSQL-only checked query" {
     const generated = try generator.generateQuery(std.testing.allocator, &source, &checked);
     defer std.testing.allocator.free(generated);
     try std.testing.expect(std.mem.indexOf(u8, generated, ".postgres = true") != null);
-    const terminated = try std.testing.allocator.dupeZ(u8, generated);
+    const terminated = try std.testing.allocator.dupeSentinel(u8, generated, 0);
     defer std.testing.allocator.free(terminated);
-    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .zig);
+    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .{});
     defer ast.deinit(std.testing.allocator);
     try std.testing.expectEqual(@as(usize, 0), ast.errors.len);
 }
@@ -111,9 +111,9 @@ test "assembles checked queries into deterministic path namespaces" {
     try std.testing.expect(std.mem.indexOf(u8, generated, "pub const get_user = sqlz.Query") != null);
     try std.testing.expect(std.mem.indexOf(u8, generated, "pub const list_users = sqlz.Query") != null);
 
-    const terminated = try std.testing.allocator.dupeZ(u8, generated);
+    const terminated = try std.testing.allocator.dupeSentinel(u8, generated, 0);
     defer std.testing.allocator.free(terminated);
-    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .zig);
+    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .{});
     defer ast.deinit(std.testing.allocator);
     try std.testing.expectEqual(@as(usize, 0), ast.errors.len);
 
@@ -169,9 +169,9 @@ test "codec overrides name the bound Zig declaration" {
     try std.testing.expect(std.mem.indexOf(u8, generated, "tier: sqlz_codec_tier.Tier,") != null);
     try std.testing.expect(std.mem.indexOf(u8, generated, "id: i64") != null);
 
-    const terminated = try std.testing.allocator.dupeZ(u8, generated);
+    const terminated = try std.testing.allocator.dupeSentinel(u8, generated, 0);
     defer std.testing.allocator.free(terminated);
-    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .zig);
+    var ast = try std.zig.Ast.parse(std.testing.allocator, terminated, .{});
     defer ast.deinit(std.testing.allocator);
     try std.testing.expectEqual(@as(usize, 0), ast.errors.len);
 

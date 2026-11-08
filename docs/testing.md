@@ -52,7 +52,7 @@ possible so they can fail before integration infrastructure is involved.
   deployments, adoption, ambiguous candidates, finalized tombstones, source
   pruning, and downgrade-boundary refusal;
 - generated-binding snapshots plus compile-pass and compile-fail fixtures on Zig
-  0.16.0;
+  0.17.0;
 - runtime integration tests for borrowed/owned lifetimes, owned-row scopes,
   transaction cleanup and locking behavior, native pools, arrays, non-STRICT
   SQLite validation, enum and narrow-scalar decoding, and error ownership;

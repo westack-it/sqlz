@@ -1,7 +1,7 @@
 [tools]
 hk = "1.56.1"
 pkl = "0.32.1"
-zig = "0.16.0"
+zig = "0.17.0"
 
 [tasks.check]
 description = "Run quick offline checks used by pre-commit hooks"

@@ -66,7 +66,7 @@ fn tempDatabasePath(tmp: *std.testing.TmpDir) ![]u8 {
 }
 
 fn createSourceDatabase(path: []const u8) !void {
-    const path_z = try allocator.dupeZ(u8, path);
+    const path_z = try allocator.dupeSentinel(u8, path, 0);
     defer allocator.free(path_z);
     const source = try zqlite.open(
         path_z,
@@ -81,7 +81,7 @@ fn createSourceDatabase(path: []const u8) !void {
         .limited(1024 * 1024),
     );
     defer allocator.free(script);
-    const script_z = try allocator.dupeZ(u8, script);
+    const script_z = try allocator.dupeSentinel(u8, script, 0);
     defer allocator.free(script_z);
     try source.execNoArgs(script_z);
 }

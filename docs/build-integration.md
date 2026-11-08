@@ -30,7 +30,7 @@ backend may be checked without being in the runtime set, never the reverse. See
 
 ## Build API
 
-The current Zig 0.16 checked-query contract is:
+The current Zig 0.17 checked-query contract is:
 
 ```zig
 const tool = sqlz_build.addTool(b, .{ .dependency = sqlz_dep });
@@ -148,9 +148,10 @@ checking, so stale output cannot compile. Targets containing embedded
 they import no generated named-query module.
 
 All configuration, migration, SQL, Zig discovery roots, catalogs, and supplements
-are registered as build inputs. On Zig 0.16, directory roots use
-`std.Build.Step.addDirectoryWatchInput`, while individual lazy paths remain normal
-step inputs. Output paths are content-addressed from tool version, all input bytes,
+are registered as build inputs. Files are normal step inputs, found by walking
+the project directory at configure time; each visited directory is declared with
+`std.Build.dependOnDirectoryContents`, so adding or removing a file repeats
+configuration. Output paths are content-addressed from tool version, all input bytes,
 profiles, semantic configuration, and codec IDs. Absolute checkout paths and
 credentials never enter keys or generated files.
 The migration root's `history.ziggy` compacted-history registry is always an input

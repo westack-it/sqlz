@@ -33,8 +33,8 @@ produced them, and the field is readable as `conn.io` for escape hatches.
 Materialized handles — `Single` and `Owned` rows — deliberately do not carry
 it: their remaining work is memory, not I/O.
 
-`std.Io.Evented` is not a supported target on Zig 0.16.0. It resolves to
-`std.Io.Dispatch` on macOS, whose `deinit` does not compile in that release, so
+`std.Io.Evented` is not a supported target on Zig 0.17.0. It resolves to
+`std.Io.Dispatch` on macOS, whose `init` does not compile in that release, so
 sqlz makes no claim about it.
 
 SQLite is an in-process blocking library, so the SQLite backend performs no

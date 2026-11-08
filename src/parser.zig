@@ -43,7 +43,7 @@ pub const SqliteProfile = enum(u8) {
             "3.50", "3.51", "3.52", "3.53",
         };
         for (values, 0..) |candidate, index| {
-            if (std.mem.eql(u8, value, candidate)) return @enumFromInt(index);
+            if (std.mem.eql(u8, value, candidate)) return @fromBackingInt(@intCast(index));
         }
         return null;
     }
@@ -63,7 +63,7 @@ pub const PostgresProfile = enum(u8) {
     pub fn fromString(value: []const u8) ?PostgresProfile {
         const values = [_][]const u8{ "15", "16", "17", "18" };
         for (values, 0..) |candidate, index| {
-            if (std.mem.eql(u8, value, candidate)) return @enumFromInt(index);
+            if (std.mem.eql(u8, value, candidate)) return @fromBackingInt(@intCast(index));
         }
         return null;
     }
@@ -301,7 +301,7 @@ fn parseLexed(
     var rewritten = try rewriteParameters(allocator, source, dialect, .postgres);
     errdefer rewritten.deinit(allocator);
 
-    const terminated = try allocator.dupeZ(u8, rewritten.sql);
+    const terminated = try allocator.dupeSentinel(u8, rewritten.sql, 0);
     defer allocator.free(terminated);
     const native = libpg_query.pg_query_parse_protobuf(terminated.ptr);
     defer libpg_query.pg_query_free_protobuf_parse_result(native);
@@ -508,7 +508,7 @@ fn normalizeSqlite(
                     return error.UnsupportedSqliteFeature;
             },
             .number => if (std.mem.indexOfScalar(u8, text, '_')) |_| {
-                if (@intFromEnum(dialect.profile) < @intFromEnum(SqliteProfile.v3_46))
+                if (@backingInt(dialect.profile) < @backingInt(SqliteProfile.v3_46))
                     return error.UnsupportedSqliteFeature;
                 // libpg_query does not recognize SQLite's separator. A digit
                 // keeps the token numeric and preserves every source offset;

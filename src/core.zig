@@ -171,20 +171,17 @@ pub fn enumStorage(comptime E: type) Storage {
 pub fn BoundArgs(comptime Args: type) type {
     const info = @typeInfo(Args);
     if (info != .@"struct") return Args;
-    const fields = info.@"struct".fields;
-    var names: [fields.len][:0]const u8 = undefined;
-    var types: [fields.len]type = undefined;
+    const field_types = info.@"struct".field_types;
+    var types: [field_types.len]type = undefined;
     var lowered = false;
-    for (fields, &names, &types) |field, *name, *Bound| {
-        Bound.* = BoundType(field.type);
-        if (Bound.* != field.type) lowered = true;
-        name.* = field.name;
+    for (field_types, &types) |Field, *Bound| {
+        Bound.* = BoundType(Field);
+        if (Bound.* != Field) lowered = true;
     }
     if (!lowered) return Args;
-    const frozen_names = names;
     const frozen_types = types;
     if (info.@"struct".is_tuple) return @Tuple(&frozen_types);
-    return @Struct(.auto, null, &frozen_names, &frozen_types, &@splat(.{}));
+    return @Struct(.auto, null, info.@"struct".field_names, &frozen_types, &@splat(.{}));
 }
 
 pub fn bindArgs(args: anytype) BoundArgs(@TypeOf(args)) {
@@ -192,8 +189,9 @@ pub fn bindArgs(args: anytype) BoundArgs(@TypeOf(args)) {
     const Bound = BoundArgs(Args);
     if (Bound == Args) return args;
     var bound: Bound = undefined;
-    inline for (@typeInfo(Args).@"struct".fields) |field|
-        @field(bound, field.name) = bindValue(field.type, @field(args, field.name));
+    const info = @typeInfo(Args).@"struct";
+    inline for (info.field_names, info.field_types) |name, Field|
+        @field(bound, name) = bindValue(Field, @field(args, name));
     return bound;
 }
 
@@ -214,7 +212,7 @@ fn BoundType(comptime T: type) type {
 fn bindValue(comptime T: type, value: T) BoundType(T) {
     return switch (@typeInfo(T)) {
         .@"enum" => switch (comptime enumStorage(T)) {
-            .integer => @intCast(@intFromEnum(value)),
+            .integer => @intCast(@backingInt(value)),
             .text => @tagName(value),
         },
         .optional => |optional| if (value) |inner| bindValue(optional.child, inner) else null,
@@ -268,12 +266,12 @@ fn cloneValue(allocator: std.mem.Allocator, comptime T: type, value: T) !T {
         } else value,
         .@"struct" => |info| blk: {
             var result: T = undefined;
-            inline for (info.fields, 0..) |field, index| {
+            inline for (info.field_names, info.field_types, 0..) |name, Field, index| {
                 // A later field failing to allocate must not strand the fields
                 // already copied, so unwind exactly the prefix that succeeded.
-                errdefer inline for (info.fields[0..index]) |copied|
-                    deinitValue(allocator, copied.type, @field(result, copied.name));
-                @field(result, field.name) = try cloneValue(allocator, field.type, @field(value, field.name));
+                errdefer inline for (info.field_names[0..index], info.field_types[0..index]) |copied, Copied|
+                    deinitValue(allocator, Copied, @field(result, copied));
+                @field(result, name) = try cloneValue(allocator, Field, @field(value, name));
             }
             break :blk result;
         },
@@ -306,8 +304,8 @@ fn deinitValue(allocator: std.mem.Allocator, comptime T: type, value: T) void {
             for (value) |item| deinitValue(allocator, pointer.child, item);
             allocator.free(value);
         },
-        .@"struct" => |info| inline for (info.fields) |field|
-            deinitValue(allocator, field.type, @field(value, field.name)),
+        .@"struct" => |info| inline for (info.field_names, info.field_types) |name, Field|
+            deinitValue(allocator, Field, @field(value, name)),
         else => {},
     }
 }
