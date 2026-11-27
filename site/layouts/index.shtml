@@ -1,0 +1,71 @@
+<extend template="base.shtml">
+<title id="title" :text="$page.title"></title>
+<head id="head"></head>
+<main id="main">
+	<section class="hero dark">
+		<div class="container hero-inner">
+			<a class="badge badge-outline hero-release" href="$site.page('log').link()">
+				<span class="dot"></span>
+				<ctx :text="$page.custom.get('status')"></ctx>
+				<span class="icon i-arrow-right"></span>
+			</a>
+			<h1 class="display" :text="$site.title"></h1>
+			<p class="hero-tagline" :text="$page.custom.get('tagline')"></p>
+			<p class="hero-lead" :text="$page.custom.get('lead')"></p>
+			<div class="hero-ctas">
+				<a class="btn btn-primary btn-lg" href="$site.page('quickstart').link()">
+					Get started
+					<span class="icon i-arrow-right"></span>
+				</a>
+				<a class="btn btn-outline btn-lg" href="$site.page('docs').link()">
+					<span class="icon i-book-open"></span>
+					Read the docs
+				</a>
+			</div>
+			<ctx :if="$page.custom.has('install')">
+			<div class="install">
+				<span class="install-prompt" aria-hidden="true">$</span>
+				<code :text="$page.custom.get('install')"></code>
+				<button class="btn btn-ghost btn-icon" type="button" aria-label="Copy install command" data-copy="$page.custom.get('install')">
+					<span class="icon i-copy"></span>
+				</button>
+			</div>
+			</ctx>
+		</div>
+		<img class="hero-mesh" src="$site.asset('brand/imagery/ci-key-visual-mesh.jpg').link()" alt="" width="2400" height="576">
+	</section>
+
+	<ctx :if="$page.hasContentSection('proof')">
+	<section class="section">
+		<div class="container proof" :html="$page.contentSection('proof')"></div>
+	</section>
+	</ctx>
+
+	<section class="section">
+		<div class="container">
+			<p class="overline">Features</p>
+			<h2 class="h2">Why
+				<ctx :text="$site.title"></ctx>
+			</h2>
+			<div class="card-grid" :loop="$page.contentSections()">
+				<ctx :if="$loop.it.id.startsWith('feature-')">
+					<article class="card feature">
+						<div class="icon-tile">
+							<span class="$loop.it.data.get('icon').prefix('icon i-')"></span>
+						</div>
+						<h3 class="h4" :html="$loop.it.heading()"></h3>
+						<div class="feature-body" :html="$loop.it.htmlNoHeading()"></div>
+					</article>
+				</ctx>
+			</div>
+		</div>
+	</section>
+
+	<ctx :if="$page.hasContentSection('about')">
+	<section class="section section-about">
+		<div class="container">
+			<div class="prose" :html="$page.contentSection('about')"></div>
+		</div>
+	</section>
+	</ctx>
+</main>

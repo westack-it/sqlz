@@ -1,0 +1,56 @@
+---
+.title = "Changelog",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "log.shtml",
+.alternatives = [.{
+  .name = "rss",
+  .layout = "log.xml",
+  .output = "index.xml",
+}],
+---
+
+[]($section.id('about'))
+sqlz has no tagged release yet. This log records notable milestones on
+`main`; the full history is in the
+[commit log](https://github.com/westack-it/sqlz/commits/main).
+
+# [Zig 0.17]($section.id('zig-0.17').data('date','2026-11-08'))
+
+- The toolchain and all dependencies moved to Zig 0.17.0.
+
+# [Source manager and lexer]($section.id('source-and-lexer').data('date','2026-10-20'))
+
+- A source manager handles BOMs, UTF-8 validation, scalar columns and LF/CRLF
+  line endings for every diagnostic.
+- A shared, dialect-aware SQL lexer with enforced token and nesting limits.
+- Source trust boundaries: every input must resolve inside the project root,
+  and symlinked directories inside a root fail the check.
+- Each project declares its own runtime backends with
+  `ProjectOptions.runtime`.
+
+>[]($block.attrs('warning'))
+>`addProject` now panics at configure time when `.runtime` names a backend the
+>sqlz dependency was configured without.
+
+# [Diagnostics]($section.id('diagnostics').data('date','2026-09-19'))
+
+- PostgreSQL syntax errors, migration graph errors, catalog and semantic
+  errors are reported with source spans and excerpts.
+- Diagnostics are also available as versioned JSON.
+- PostgreSQL server versions are enforced at connect time.
+
+# [PostgreSQL]($section.id('postgres').data('date','2026-09-18'))
+
+- Offline PostgreSQL migration replay, enum, domain and array checking.
+- A pg.zig runtime adapter with pools, one-dimensional arrays and a live
+  conformance matrix for PostgreSQL 15–18.
+- Backend-specific query variants and lazy runtime backend selection.
+- An experimental `zig build sqlz -- bootstrap postgres` command that copies a
+  SQLite database into PostgreSQL.
+
+# [Checked queries on SQLite]($section.id('sqlite').data('date','2026-09-17'))
+
+- The checker, binding generator and SQLite runtime: all four cardinalities,
+  borrowed and owned rows, transactions, pools and enum codecs.
+- Queries declared in Zig with `sqlz.Query` are checked, including their
+  `.params` and `.row` structs.

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head id="head">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="$page.description.len().gt(0).then($page.description, $site.custom.get('description'))">
+		<meta property="og:type" content="website">
+		<meta property="og:site_name" content="$site.title">
+		<meta property="og:title" content="$page.title.suffix(' · ', $site.title)">
+		<meta property="og:url" content="$site.host_url.addPath($page.link())">
+		<title id="title">
+			<super>
+			·
+			<ctx :text="$site.title"></ctx>
+		</title>
+		<link rel="icon" type="image/svg+xml" href="$site.asset('brand/logos/ci/westack-mark-pink.svg').link()">
+		<link rel="alternate" type="application/rss+xml" title="$site.title.suffix(' changelog')" href="$site.page('log').alternative('rss').link()">
+		<link rel="preload" as="font" type="font/woff2" crossorigin href="$site.asset('brand/fonts/geist/Geist-Regular.woff2').link()">
+		<link rel="preload" as="font" type="font/woff2" crossorigin href="$site.asset('brand/fonts/geist/Geist-Bold.woff2').link()">
+		<link rel="stylesheet" href="$site.asset('brand/fonts/fonts.css').link()">
+		<link rel="stylesheet" href="$site.asset('brand/system/variables.css').link()">
+		<link rel="stylesheet" href="$site.asset('style.css').link()">
+		<link rel="stylesheet" href="$site.asset('highlight.css').link()">
+		<script>
+			// Apply the stored theme before first paint. Without a stored choice
+			// the tokens follow prefers-color-scheme.
+			try {
+				var t = localStorage.getItem("theme");
+				if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+			} catch (e) {}
+		</script>
+		<script defer src="$site.asset('site.js').link()"></script>
+		<super>
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<header class="site-header">
+			<nav class="nav container-wide" aria-label="Main">
+				<a class="nav-brand" href="$site.link()">
+					<img class="nav-mark" src="$site.asset('brand/logos/ci/westack-mark-white.svg').link()" alt="" width="36" height="23" data-dark>
+					<img class="nav-mark" src="$site.asset('brand/logos/ci/westack-mark-midnight.svg').link()" alt="" width="36" height="23" data-light>
+					<span class="nav-project" :text="$site.title"></span>
+				</a>
+				<div class="nav-sheet" id="nav-sheet">
+					<button class="btn btn-ghost btn-icon nav-close" type="button" aria-label="Close menu" data-nav-close>
+						<span class="icon i-x"></span>
+					</button>
+					<ul class="nav-links">
+						<li>
+							<a href="$site.page('quickstart').link()" class="$site.page('quickstart').isCurrent().then('active', '')">Quickstart</a>
+						</li>
+						<li>
+							<a href="$site.page('docs').link()" class="$page.link().startsWith($site.page('docs').link()).then('active', '')">Docs</a>
+						</li>
+						<li>
+							<a href="$site.page('log').link()" class="$site.page('log').isCurrent().then('active', '')">Changelog</a>
+						</li>
+						<li>
+							<a href="$site.page('community').link()" class="$site.page('community').isCurrent().then('active', '')">Community</a>
+						</li>
+					</ul>
+					<div class="nav-actions">
+						<button class="btn btn-ghost btn-icon" type="button" aria-label="Toggle color theme" data-theme-toggle>
+							<span class="icon i-sun" data-dark></span>
+							<span class="icon i-moon" data-light></span>
+						</button>
+						<a class="btn btn-ghost" href="$site.custom.get('repo_url')">
+							<span class="icon i-git-branch"></span>
+							Source
+						</a>
+						<a class="btn btn-outline" href="$site.page('quickstart').link()">
+							<span class="icon i-zap"></span>
+							Get started
+						</a>
+					</div>
+				</div>
+				<button class="btn btn-ghost btn-icon nav-open" type="button" aria-label="Open menu" aria-controls="nav-sheet" aria-expanded="false" data-nav-open>
+					<span class="icon i-menu"></span>
+				</button>
+			</nav>
+		</header>
+		<main id="main">
+			<super>
+		</main>
+		<footer class="site-footer">
+			<div class="container footer-grid">
+				<div class="footer-brand">
+					<img src="$site.asset('brand/logos/ci/westack-layout01-white.svg').link()" alt="WeStack" width="128" height="94">
+					<p :text="$site.custom.get('description')"></p>
+				</div>
+				<div>
+					<h2 class="overline">Project</h2>
+					<ul>
+						<li><a href="$site.page('quickstart').link()">Quickstart</a></li>
+						<li><a href="$site.page('docs').link()">Documentation</a></li>
+						<li><a href="$site.page('log').link()">Changelog</a></li>
+						<li><a href="$site.page('log').alternative('rss').link()">RSS feed</a></li>
+					</ul>
+				</div>
+				<div>
+					<h2 class="overline">Community</h2>
+					<ul>
+						<li><a href="$site.custom.get('repo_url')">Source code</a></li>
+						<li><a href="$site.custom.get('forum_url')">Issue tracker</a></li>
+						<li><a href="$site.custom.get('docs_url')">Design documents</a></li>
+						<li><a href="$site.page('community').link()">Contributing</a></li>
+					</ul>
+				</div>
+				<div>
+					<h2 class="overline" :text="$site.custom.get('org_name')"></h2>
+					<ul>
+						<li><a href="$site.custom.get('org_url')">westack-it.eu</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="container footer-legal">
+				<span>
+					<ctx :text="$site.title"></ctx>
+					is released under the
+					<ctx :text="$site.custom.get('license')"></ctx>
+					license.
+				</span>
+				<span>
+					Built with
+					<a href="https://zine-ssg.io">Zine</a>
+					on
+					<time :text="$build.generated.format('January 2, 2006')"></time>.
+				</span>
+			</div>
+		</footer>
+	</body>
+</html>

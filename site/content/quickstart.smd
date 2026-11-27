@@ -1,0 +1,131 @@
+---
+.title = "Quickstart",
+.description = "Add sqlz to a Zig project and run your first checked query.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "page.shtml",
+---
+
+# [Add the dependency]($heading.id('add-the-dependency'))
+
+sqlz needs Zig 0.17.0 or newer. Add it to your `build.zig.zon`:
+
+```console
+$ zig fetch --save git+https://github.com/westack-it/sqlz
+```
+
+>[]($block.attrs('note'))
+>sqlz has no tagged release yet. `zig fetch` pins the current commit; update
+>it deliberately, since the API is still moving.
+
+# [Wire up the build]($heading.id('wire-up-the-build'))
+
+Enable the backends you need and register one sqlz project. The check step
+runs the checker on the host and generates the `queries` module:
+
+```zig
+const std = @import("std");
+const sqlz_build = @import("sqlz");
+
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+    const sqlz_dep = b.dependency("sqlz", .{ .sqlite = true });
+
+    const tool = sqlz_build.addTool(b, .{ .dependency = sqlz_dep });
+    const db = tool.addProject(.{
+        .name = "app",
+        .config = b.path("sqlz.ziggy"),
+        .runtime = .{ .sqlite = true },
+    });
+
+    const exe = b.addExecutable(.{
+        .name = "app",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+        }),
+    });
+    exe.root_module.addImport("sqlz", db.runtime_module);
+    exe.root_module.addImport("queries", db.queries_module);
+    exe.step.dependOn(db.check_step);
+    b.installArtifact(exe);
+}
+```
+
+# [Describe the project]($heading.id('describe-the-project'))
+
+`sqlz.ziggy` sits next to `build.zig` and tells the checker where migrations
+and queries live:
+
+```ziggy
+.format_version = 1,
+.project_id = "8f1f2f7c-6f2a-4f5a-9a4a-1d6f3b5c7e21",
+.migrations = "migrations",
+.sql_roots = .{ .app = "queries" },
+.zig_roots = ["src"],
+.backends = .{
+  .sqlite = .{ .profile = "3.53" },
+},
+```
+
+Add a first migration in `migrations/aaaaaaaaaaaa_init/`:
+
+```ziggy
+// revision.ziggy
+.format_version = 1,
+.revision = "aaaaaaaaaaaa",
+.parents = [],
+.description = "create users",
+.created_utc = "2026-11-27T12:00:00Z",
+.backends = [.sqlite],
+.reversible = true,
+.transaction = .{ .sqlite = .always },
+```
+
+```sql
+-- common.up.sql
+CREATE TABLE users(id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+```
+
+```sql
+-- common.down.sql
+DROP TABLE users;
+```
+
+# [Write a query]($heading.id('write-a-query'))
+
+Each `.sql` file under `queries/` is one named query. The header comments
+name it, choose its backends and say how many rows it returns:
+
+```sql
+-- queries/users/find_user.sql
+-- sqlz.name: find_user
+-- sqlz.backends: sqlite
+-- sqlz.cardinality: optional
+
+SELECT id, name FROM users WHERE id = :id;
+```
+
+# [Run it]($heading.id('run-it'))
+
+```zig
+const std = @import("std");
+const sqlz = @import("sqlz");
+const find_user = @import("queries").app.users.find_user;
+
+pub fn main(init: std.process.Init) !void {
+    var conn = try sqlz.sqlite.open(init.gpa, init.io, "app.db", .{});
+    defer conn.deinit();
+
+    var found = (try sqlz.unwrap(find_user.fetchOptional(&conn, .{ .id = 1 }))) orelse
+        return error.UserMissing;
+    defer found.deinit();
+    std.log.info("user: {s}", .{found.row().name});
+}
+```
+
+Now break the query, for example by selecting a column that doesn't exist,
+and run `zig build`. The checker rejects it before anything is compiled.
+
+Next, read how [checked queries]($link.page('docs/guides/queries')) work, or
+browse the runnable programs in
+[`examples/`](https://github.com/westack-it/sqlz/tree/main/examples).

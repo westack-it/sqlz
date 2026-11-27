@@ -1,0 +1,31 @@
+<extend template="base.shtml">
+<title id="title" :text="$page.title"></title>
+<head id="head"></head>
+<main id="main">
+	<article class="container-reading page">
+		<header class="page-header">
+			<p class="overline" :text="$site.title"></p>
+			<h1 class="h1" :text="$page.title"></h1>
+			<a class="btn btn-ghost btn-sm" href="$page.alternative('rss').link()">
+				<span class="icon i-rss"></span>
+				Subscribe via RSS
+			</a>
+		</header>
+		<ctx :loop="$page.contentSections()">
+			<ctx :if="$loop.it.id.eql('about')">
+				<div class="prose" :html="$loop.it.html()"></div>
+			</ctx>
+			<ctx :if="$loop.it.id.eql('about').not()">
+			<section class="card release" id="$loop.it.id">
+				<header class="release-header">
+					<h2 class="h3">
+						<a href="$loop.it.id.prefix('#')" :text="$loop.it.id"></a>
+					</h2>
+					<time class="mono muted" :text="$loop.it.data.get('date')"></time>
+				</header>
+				<div class="prose" :html="$loop.it.htmlNoHeading()"></div>
+			</section>
+			</ctx>
+		</ctx>
+	</article>
+</main>

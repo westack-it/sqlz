@@ -1,0 +1,59 @@
+---
+.title = "CLI",
+.description = "The build-integrated zig build sqlz command.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+---
+
+sqlz has no separate binary. Every command runs through the build:
+
+```console
+$ zig build sqlz -- <command>
+```
+
+`--project NAME` selects a registered project and is inferred when only one
+applies.
+
+# [Implemented]($heading.id('implemented'))
+
+## bootstrap postgres
+
+Copies a SQLite database into a dedicated PostgreSQL schema: replays the
+PostgreSQL head, transfers rows with bound parameters, restores sequences and
+validates row counts.
+
+```console
+$ zig build sqlz -- bootstrap postgres --from-sqlite app.db \
+    --postgres-url postgres://localhost/app [--wipe-postgres --yes]
+```
+
+| Flag | Description |
+| --- | --- |
+| `--from-sqlite PATH` | source SQLite database |
+| `--postgres-url URL` | destination; falls back to `DATABASE_URL` |
+| `--wipe-postgres` | reset an existing managed destination; requires `--yes` |
+| `--project NAME` | registered project to use |
+
+>[]($block.attrs('note'))
+>The project needs both a SQLite and a PostgreSQL profile and a single-entry
+>`search_path` other than `public`. This command is experimental.
+
+# [Planned]($heading.id('planned'))
+
+The full command surface for 0.1:
+
+```
+zig build sqlz -- init
+zig build sqlz -- check [--project NAME] [--format human|json]
+zig build sqlz -- status [--project NAME] --backend NAME
+zig build sqlz -- migrate upgrade TARGET [connection options]
+zig build sqlz -- migrate downgrade TARGET [connection options]
+zig build sqlz -- revision create [--message TEXT]
+zig build sqlz -- revision merge REV...
+zig build sqlz -- state init|stamp|repair|rebind
+zig build sqlz -- journal show|prune
+```
+
+Read-only commands never prompt. Destructive commands prompt on a terminal
+and need `--yes` otherwise. `--format json` writes versioned JSON records to
+stdout and everything else to stderr.

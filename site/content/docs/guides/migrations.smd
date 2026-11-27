@@ -1,0 +1,53 @@
+---
+.title = "Migrations",
+.description = "Lay out revisions the checker replays into a schema.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+---
+
+>[]($block.attrs('warning'))
+>sqlz reads and replays migrations offline today, but it can't yet apply them
+>to a database. Migration state, locking, `migrate upgrade` and
+>`migrate downgrade` are planned for 0.1 and not implemented.
+
+# [Revisions]($heading.id('revisions'))
+
+Migrations form an Alembic-style graph. Each revision is a directory under
+the configured `migrations` root with a manifest and its SQL:
+
+```
+migrations/
+  aaaaaaaaaaaa_example_schema/
+    revision.ziggy
+    common.up.sql
+    common.down.sql
+```
+
+```ziggy
+.format_version = 1,
+.revision = "aaaaaaaaaaaa",
+.parents = [],
+.description = "example schema",
+.created_utc = "2026-09-16T12:00:00Z",
+.backends = [.sqlite, .postgres],
+.reversible = true,
+.transaction = .{ .sqlite = .always, .postgres = .always },
+```
+
+`common.*.sql` applies to every listed backend. Revisions can carry
+backend-specific SQL when the dialects differ.
+
+# [Branches and merges]($heading.id('branches'))
+
+A revision with several `.parents` merges branches. A revision without a
+child is a head. The checker validates the graph (missing parents, cycles,
+duplicate IDs) and orders it deterministically.
+
+# [Offline replay]($heading.id('offline-replay'))
+
+On every build the checker replays the supported DDL of the whole graph into
+an in-memory catalog per backend. That catalog is the schema your queries are
+checked against, so CI needs no database and no credentials.
+
+The supported DDL subset and the planned runner are specified in the
+[migrations design document](https://github.com/westack-it/sqlz/blob/main/docs/migrations.md).

@@ -1,0 +1,96 @@
+{
+  "format": "brand-fonts/1",
+  "license": "SIL Open Font License 1.1 (geist/OFL.txt)",
+  "files": [
+    {
+      "family": "Geist",
+      "weight": "900",
+      "style": "normal",
+      "file": "geist/Geist-Black.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 46444
+    },
+    {
+      "family": "Geist",
+      "weight": "700",
+      "style": "normal",
+      "file": "geist/Geist-Bold.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 46648
+    },
+    {
+      "family": "Geist",
+      "weight": "300",
+      "style": "normal",
+      "file": "geist/Geist-Light.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 45512
+    },
+    {
+      "family": "Geist",
+      "weight": "500",
+      "style": "normal",
+      "file": "geist/Geist-Medium.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 46380
+    },
+    {
+      "family": "Geist",
+      "weight": "400",
+      "style": "normal",
+      "file": "geist/Geist-Regular.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 45144
+    },
+    {
+      "family": "Geist",
+      "weight": "600",
+      "style": "normal",
+      "file": "geist/Geist-SemiBold.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 46520
+    },
+    {
+      "family": "Geist",
+      "weight": "100 900",
+      "style": "normal",
+      "file": "geist/Geist-Variable.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 69576
+    },
+    {
+      "family": "Geist Mono",
+      "weight": "500",
+      "style": "normal",
+      "file": "geist/GeistMono-Medium.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 51452
+    },
+    {
+      "family": "Geist Mono",
+      "weight": "400",
+      "style": "normal",
+      "file": "geist/GeistMono-Regular.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 50404
+    },
+    {
+      "family": "Geist Mono",
+      "weight": "100 900",
+      "style": "normal",
+      "file": "geist/GeistMono-Variable.woff2",
+      "format": "woff2",
+      "sourceUrl": "https://www.npmjs.com/package/geist (v1.9.0, dist/fonts)",
+      "bytes": 71272
+    }
+  ]
+}

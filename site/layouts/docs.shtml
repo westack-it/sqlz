@@ -1,0 +1,42 @@
+<extend template="base.shtml">
+<title id="title" :text="$page.title"></title>
+<head id="head"></head>
+<main id="main">
+	<div class="docs-shell container-wide">
+		<aside class="docs-sidebar" aria-label="Documentation">
+			<details class="docs-nav" open>
+				<summary class="docs-nav-toggle">
+					<span class="icon i-book-open"></span>
+					Documentation
+				</summary>
+				<ctx :loop="$site.asset('docs-nav.ziggy').ziggy()">
+					<p class="overline" :text="$loop.it.get('title')"></p>
+					<ul :loop="$loop.it.get('pages')">
+						<li>
+							<a href="$site.page($loop.it).link()" class="$site.page($loop.it).isCurrent().then('active', '')" :text="$site.page($loop.it).title"></a>
+						</li>
+					</ul>
+				</ctx>
+			</details>
+		</aside>
+		<article class="docs-article">
+			<header class="page-header">
+				<p class="overline">
+					<span class="icon i-book-open"></span>
+					Docs
+				</p>
+				<h1 class="h1" :text="$page.title"></h1>
+				<ctx :if="$page.description.len().gt(0)">
+				<p class="page-lead" :text="$page.description"></p>
+			</ctx>
+			</header>
+			<div class="prose" :html="$page.content()"></div>
+		</article>
+		<ctx :if="$page.custom.getOr('toc', true)">
+			<nav class="docs-toc" aria-label="On this page">
+				<p class="overline">On this page</p>
+				<ctx :html="$page.toc()"></ctx>
+			</nav>
+		</ctx>
+	</div>
+</main>

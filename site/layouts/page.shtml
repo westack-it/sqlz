@@ -1,0 +1,15 @@
+<extend template="base.shtml">
+<title id="title" :text="$page.title"></title>
+<head id="head"></head>
+<main id="main">
+	<article class="container-reading page">
+		<header class="page-header">
+			<p class="overline" :text="$site.title"></p>
+			<h1 class="h1" :text="$page.title"></h1>
+			<ctx :if="$page.description.len().gt(0)">
+				<p class="page-lead" :text="$page.description"></p>
+			</ctx>
+		</header>
+		<div class="prose" :html="$page.content()"></div>
+	</article>
+</main>
