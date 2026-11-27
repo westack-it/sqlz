@@ -1,0 +1,71 @@
+---
+.title = "Home",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "index.shtml",
+.custom = {
+  "tagline": "Write SQL. Get typed Zig. Check it before it runs.",
+  "lead": "sqlz is a SQL toolkit for Zig, inspired by Rust's SQLx. It checks your queries against a schema rebuilt from your migrations, generates typed bindings, and runs them on SQLite or PostgreSQL. No ORM, no query builder, no database needed at build time.",
+  "install": "zig fetch --save git+https://github.com/westack-it/sqlz",
+  "status": "Early development · Zig 0.17",
+},
+---
+
+[]($section.id('proof'))
+- Open source, MIT
+- SQLite 3.45–3.53
+- PostgreSQL 15–18
+- Offline checking, no live database
+- Backends lazy and off by default
+
+# [Checked at build time]($section.id('feature-checked').data('icon','shield-check'))
+`zig build` parses every query with pinned `libpg_query` and checks it against
+your schema. Unknown columns, wrong parameter types and nullability mistakes
+fail the build with source spans.
+
+# [Schema from migrations]($section.id('feature-offline').data('icon','git-branch'))
+The checker replays your migration history into an in-memory catalog. CI
+checks the same schema as your laptop, without credentials or a running
+database.
+
+# [Typed bindings]($section.id('feature-typed').data('icon','zap'))
+Named parameters become a params struct, result columns become a row struct.
+Rows borrow from the driver; converting to owned rows is explicit.
+
+# [Two ways to write queries]($section.id('feature-authoring').data('icon','book-open'))
+Keep SQL in named `.sql` files, or declare a `sqlz.Query` next to the code
+that runs it. Both are checked the same way.
+
+# [Pay only for what you use]($section.id('feature-lazy').data('icon','package'))
+SQLite (via zqlite) and PostgreSQL (via pg.zig) are lazy dependencies. A
+disabled backend is never fetched, compiled or linked.
+
+# [Bring your own `std.Io`]($section.id('feature-io').data('icon','server'))
+Runtime handles take the application's `std.Io`, so sqlz runs on
+`std.Io.Threaded` or a third-party runtime such as zio.
+
+# [What is sqlz?]($section.id('about'))
+sqlz keeps your application close to handwritten SQL. You write a query, the
+build checks it and hands you a typed Zig declaration:
+
+```sql
+-- sqlz.name: find_user
+-- sqlz.backends: sqlite, postgres
+-- sqlz.cardinality: optional
+
+SELECT id, name FROM users WHERE id = :id;
+```
+
+```zig
+var found = (try sqlz.unwrap(find_user.fetchOptional(&conn, .{ .id = 1 }))) orelse
+    return error.UserMissing;
+defer found.deinit();
+const user = found.row(); // struct { id: i64, name: []const u8 }
+```
+
+>[]($block.attrs('warning'))
+>sqlz is pre-release. Checked queries and both runtimes work for the current
+>SQL subset; running migrations against a database is not implemented yet,
+>and the public API will change.
+
+Follow the [quickstart]($link.page('quickstart')), or read the
+[documentation]($link.page('docs')) to see how it works.

@@ -1,0 +1,16 @@
+// Sidebar of the docs layout: groups of page paths, in display order.
+// Paths are relative to content/ (a section is its directory, e.g. "docs").
+[
+    {
+        "title": "Getting started",
+        "pages": ["docs", "docs/installation", "docs/configuration"],
+    },
+    {
+        "title": "Guides",
+        "pages": ["docs/guides", "docs/guides/queries", "docs/guides/migrations"],
+    },
+    {
+        "title": "Reference",
+        "pages": ["docs/reference/cli", "docs/reference/backends"],
+    },
+]

@@ -1,0 +1,62 @@
+/*
+ * Syntax highlighting for Zine's tree-sitter output (class names such as
+ * `keyword`, `string`, `punctuation_bracket`). Colors are design tokens only:
+ * the data palette for token kinds, muted-foreground for comments and
+ * punctuation. Status colors are never used here.
+ */
+
+pre code .comment,
+pre code [class^="punctuation"],
+pre code .operator {
+	color: var(--color-muted-foreground);
+}
+
+pre code .comment {
+	font-style: italic;
+}
+
+pre code .keyword,
+pre code [class^="keyword"],
+pre code .tag {
+	color: var(--color-data-1);
+}
+
+pre code .string,
+pre code [class^="string"] {
+	color: var(--color-data-6);
+}
+
+pre code .constant,
+pre code [class^="constant"],
+pre code .number,
+pre code .boolean {
+	color: var(--color-data-4);
+}
+
+pre code .function,
+pre code [class^="function"],
+pre code .type,
+pre code [class^="type"] {
+	color: var(--color-data-3);
+}
+
+pre code .field,
+pre code .property,
+pre code .attribute,
+pre code .string.property {
+	color: var(--color-data-2);
+}
+
+/* Console blocks: dim prompt, plain command, muted output. */
+pre code.console {
+	color: var(--color-muted-foreground);
+}
+
+pre code.console .prompt {
+	color: var(--color-muted-foreground);
+	user-select: none;
+}
+
+pre code.console .command {
+	color: var(--color-foreground);
+}

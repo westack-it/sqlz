@@ -1,0 +1,24 @@
+[tools]
+"github:kristoff-it/zine" = "0.14.0"
+
+[tasks.brand]
+description = "Refresh assets/brand/ from a local checkout of the WeStack design repo in design/"
+# The design repo is private, so CI can't fetch it. The files the site uses
+# are committed under assets/brand/; re-run this after updating design/.
+run = """
+test -d design/brand-assets || { echo "clone the design repo into design/ first" >&2; exit 1; }
+rm -rf assets/brand
+mkdir -p assets/brand/system assets/brand/logos assets/brand/imagery
+cp -R design/brand-assets/fonts assets/brand/
+cp -R design/brand-assets/logos/ci assets/brand/logos/
+cp design/brand-assets/imagery/ci-key-visual-mesh.jpg assets/brand/imagery/
+cp design/brand-assets/system/variables.css assets/brand/system/
+"""
+
+[tasks.dev]
+description = "Run the Zine dev server with live reload"
+run = "zine"
+
+[tasks.build]
+description = "Build the site into public/"
+run = "rm -rf public && zine release"

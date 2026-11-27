@@ -1,0 +1,69 @@
+---
+.title = "Installation",
+.description = "Add sqlz to a Zig build and pick your backends.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+---
+
+# [Requirements]($heading.id('requirements'))
+
+- Zig 0.17.0 or newer.
+- Nothing else at build time: the checker needs no running database.
+- At runtime, SQLite is bundled with zqlite; PostgreSQL needs a server
+  between 15 and 18.
+
+# [Fetch the package]($heading.id('fetch-the-package'))
+
+```console
+$ zig fetch --save git+https://github.com/westack-it/sqlz
+```
+
+This adds `sqlz` to `build.zig.zon`. sqlz has no tagged release yet, so the
+dependency pins a commit on `main`.
+
+# [Choose backends]($heading.id('choose-backends'))
+
+Backends are build options of the dependency. All are off by default:
+
+| Option | Effect |
+| --- | --- |
+| `sqlite` | fetch and build the zqlite runtime adapter |
+| `postgres` | fetch and build the pg.zig runtime adapter |
+| `postgres_tls` | enable driver TLS; requires `postgres` |
+
+```zig
+const sqlz_dep = b.dependency("sqlz", .{
+    .sqlite = true,
+    .postgres = true,
+});
+```
+
+A disabled driver is never fetched, imported, compiled or linked. There is no
+default backend and no runtime `AnyDatabase`: code uses `sqlz.sqlite` or
+`sqlz.postgres` directly.
+
+# [Register a project]($heading.id('register-a-project'))
+
+```zig
+const sqlz_build = @import("sqlz");
+
+const tool = sqlz_build.addTool(b, .{ .dependency = sqlz_dep });
+const db = tool.addProject(.{
+    .name = "app",
+    .config = b.path("sqlz.ziggy"),
+    .runtime = .{ .sqlite = true },
+});
+
+exe.root_module.addImport("sqlz", db.runtime_module);
+exe.root_module.addImport("queries", db.queries_module);
+exe.step.dependOn(db.check_step);
+```
+
+`.runtime` is the subset of enabled backends this project executes against.
+Naming a backend the dependency was built without panics at configure time.
+A build can register several projects with one tool.
+
+>[]($block.attrs('note'))
+>`addProject` registers every `.sql`, `.zig` and `.ziggy` file under the
+>project directory as a build input, so adding or editing a query re-runs the
+>checker.

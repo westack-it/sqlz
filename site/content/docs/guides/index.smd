@@ -1,0 +1,18 @@
+---
+.title = "Guides",
+.description = "Task-oriented walkthroughs.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+.custom = { "toc": false },
+---
+
+Step-by-step guides for common tasks:
+
+- [Checked queries]($link.page('docs/guides/queries')): write queries as
+  `.sql` files or Zig declarations and run them.
+- [Migrations]($link.page('docs/guides/migrations')): lay out revisions that
+  the checker replays into a schema.
+
+Every guide has a runnable counterpart in
+[`examples/`](https://github.com/westack-it/sqlz/tree/main/examples). Run one
+with, for example, `zig build run-basic_sql_file`.

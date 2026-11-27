@@ -1,0 +1,44 @@
+---
+.title = "Backends",
+.description = "Supported databases, profiles and drivers.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+---
+
+# [Overview]($heading.id('overview'))
+
+| Backend | Driver | Profiles | Build option |
+| --- | --- | --- | --- |
+| SQLite | [zqlite](https://github.com/karlseguin/zqlite.zig), bundled | 3.45–3.53 | `sqlite` |
+| PostgreSQL | [pg.zig](https://github.com/karlseguin/pg.zig) | 15–18 | `postgres`, `postgres_tls` |
+
+A profile in `sqlz.ziggy` selects the grammar and type rules the checker
+applies. A backend can be checked without being in a project's runtime set,
+but not the other way round.
+
+# [SQLite]($heading.id('sqlite'))
+
+```zig
+var conn = try sqlz.sqlite.open(allocator, io, "app.db", .{});
+defer conn.deinit();
+```
+
+Open options cover foreign keys, journal mode, synchronous mode, the busy
+timeout and open flags. `sqlz.sqlite.Pool` wraps zqlite's native pool.
+
+# [PostgreSQL]($heading.id('postgres'))
+
+The adapter supports pools, enum codecs and one-dimensional arrays, and
+checks the server version against the configured profile at connect time.
+CI runs the live conformance suite against PostgreSQL 15, 16, 17 and 18.
+
+# [Portable queries]($heading.id('portable'))
+
+A query lists the backends it supports. Portable queries are checked against
+each listed backend's catalog; backend-specific SQL is allowed for queries
+that name only that backend.
+
+# [I/O runtimes]($heading.id('io'))
+
+Every handle takes the application's `std.Io`. The SQLite runtime is tested
+on `std.Io.Threaded` and on a zio-backed `std.Io`.

@@ -1,0 +1,96 @@
+---
+.title = "Checked queries",
+.description = "Write queries as .sql files or Zig declarations and run them.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+---
+
+# [Queries in .sql files]($heading.id('sql-files'))
+
+Every `.sql` file under a configured SQL root holds one query. Header comments
+describe it:
+
+```sql
+-- sqlz.name: add_user
+-- sqlz.backends: sqlite, postgres
+-- sqlz.cardinality: exec
+
+INSERT INTO users(name) VALUES (:name);
+```
+
+The generated module exposes it under the root alias and its directory, for
+example `@import("queries").app.basic_sql_file.add_user`.
+
+# [Queries in Zig]($heading.id('zig-declarations'))
+
+Declare a query next to the code that runs it. The checker finds every
+`sqlz.Query` under the configured Zig roots and compares the `.params` and
+`.row` structs with the SQL: field names, order, nullability and type.
+
+```zig
+pub const list_users = sqlz.Query(.{
+    .sql = "SELECT id, name FROM users ORDER BY id",
+    .backends = .{ .sqlite = true, .postgres = true },
+    .cardinality = .many,
+    .row = struct { id: i64, name: []const u8 },
+});
+```
+
+# [Cardinality]($heading.id('cardinality'))
+
+| Cardinality | Method | Returns |
+| --- | --- | --- |
+| `exec` | `execute` | rows affected, no rows |
+| `one` | `fetchOne` | exactly one row, or an error |
+| `optional` | `fetchOptional` | zero or one row |
+| `many` | `fetch` | a stream of rows |
+
+# [Parameters]($heading.id('parameters'))
+
+Parameters are named, `:name`, on both backends. sqlz rewrites them for the
+driver and infers each parameter's type from where it's used.
+
+# [Results and errors]($heading.id('results'))
+
+Every database call returns a `sqlz.Result`: `.ok` with the value, or `.err`
+with the backend's error class, code and message. `sqlz.unwrap` turns it into
+a Zig error when the details don't matter:
+
+```zig
+switch (add_user.execute(&conn, .{ .name = "Ada" })) {
+    .ok => {},
+    .err => |err| {
+        defer err.deinit();
+        std.log.err("insert failed: {s}", .{err.message});
+    },
+}
+```
+
+# [Borrowed and owned rows]($heading.id('rows'))
+
+Rows borrow from the driver. Slices in a row stay valid until the result is
+released or the stream advances:
+
+```zig
+var rows = try sqlz.unwrap(list_users.fetch(&conn, .{}));
+defer rows.deinit();
+while (try sqlz.unwrap(rows.next())) |user| {
+    std.log.info("{d}: {s}", .{ user.id, user.name });
+}
+```
+
+To keep a row, convert it explicitly with an allocator. A connection-level
+owned-row scope can supply that allocator, for example an arena that frees
+all rows at once.
+
+# [Transactions and pools]($heading.id('transactions'))
+
+Checked queries run against a connection, a transaction or a pool alike. See
+the `basic_transaction`, `transaction_transfer` and `pooled_reads` examples.
+
+# [Unchecked SQL]($heading.id('unchecked'))
+
+SQL the checker never saw is still possible: `execute` and `fetch*` on the
+adapter take a single statement, and `executeScript` runs a parameterless
+script. The raw zqlite and pg.zig handles are available through `raw()` for
+driver features sqlz doesn't model.

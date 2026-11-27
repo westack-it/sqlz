@@ -1,0 +1,38 @@
+---
+.title = "Community",
+.description = "Where to ask questions, report bugs and contribute.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "page.shtml",
+---
+
+# [Get help]($heading.id('get-help'))
+
+- **Questions and bug reports:** open an issue in the
+  [issue tracker](https://github.com/westack-it/sqlz/issues). Include your Zig
+  version, the backend and the checker output.
+- **Design questions:** the
+  [design documents](https://github.com/westack-it/sqlz/tree/main/docs) are
+  the specification for 0.1. Most "why does it work this way" questions are
+  answered in the
+  [architecture decision records](https://github.com/westack-it/sqlz/tree/main/docs/adr).
+- **Commercial support:** talk to the [WeStack team](https://westack-it.eu).
+
+# [Contribute]($heading.id('contribute'))
+
+sqlz is open source under the MIT license, and contributions are welcome.
+
+1. Install the pinned toolchain with `mise install` and the git hook with
+   `hk install`.
+2. For anything larger than a small fix, open an issue first. Check the
+   [implementation plan](https://github.com/westack-it/sqlz/blob/main/docs/implementation-plan.md)
+   to see what is in progress.
+3. Run `mise run ci` before sending a pull request against `main`. It runs the
+   offline checks and the full test suite against SQLite and a PostgreSQL 18
+   container.
+
+Code follows [`TIGER_STYLE.md`](https://github.com/westack-it/sqlz/blob/main/TIGER_STYLE.md).
+
+# [Code of conduct]($heading.id('code-of-conduct'))
+
+Be kind, assume good intent and keep discussions on topic. Maintainers may
+remove content or people that make the community worse for others.

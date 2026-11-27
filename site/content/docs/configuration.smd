@@ -1,0 +1,75 @@
+---
+.title = "Configuration",
+.description = "The sqlz.ziggy project file.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+---
+
+# [The project file]($heading.id('the-project-file'))
+
+`sqlz.ziggy` is the checked-in source of truth for one sqlz project. The
+directory that holds it is the project root. It uses
+[Ziggy](https://ziggy-lang.io), a data format with comments and trailing
+commas.
+
+```ziggy
+.format_version = 1,
+.project_id = "550e8400-e29b-41d4-a716-446655440000",
+.migrations = "migrations",
+.sql_roots = .{ .app = "queries", .admin = "admin-queries" },
+.zig_roots = ["src"],
+.backends = .{
+  .sqlite = .{ .profile = "3.53" },
+  .postgres = .{ .profile = "15", .search_path = ["app", "public"] },
+},
+.codecs = .{
+  .uuid = .{ .sqlite_types = ["BLOB"], .postgres_types = ["pg_catalog.uuid"] },
+},
+```
+
+# [Fields]($heading.id('fields'))
+
+| Field | Meaning |
+| --- | --- |
+| `format_version` | configuration format; currently `1` |
+| `project_id` | canonical lowercase UUIDv4 that identifies migration ownership |
+| `migrations` | the directory of revision folders |
+| `sql_roots` | alias → directory of `.sql` queries; each alias becomes a namespace in the generated module |
+| `zig_roots` | directories scanned for `sqlz.Query` declarations |
+| `backends` | the checking profile for each backend |
+| `codecs` | codec IDs and the database types they map |
+
+Unknown fields, duplicate aliases, unsupported format versions and invalid
+paths are rejected. `sqlz` and names starting with `sqlz_` are reserved and
+can't be used as root aliases.
+
+# [Paths]($heading.id('paths'))
+
+Relative paths resolve from `sqlz.ziggy`. `.` and `..` are rejected as path
+components, except that a root may be exactly `"."` to scan the project root
+itself.
+
+>[]($block.attrs('warning'))
+>Every input must resolve inside the project root after following symlinks.
+>A symlinked directory inside a root fails the check rather than being
+>skipped or followed.
+
+# [Codecs]($heading.id('codecs'))
+
+A codec maps database types to an application type. `sqlz.ziggy` names the
+database side; `build.zig` binds the Zig side once per project:
+
+```zig
+const db = tool.addProject(.{
+    .name = "app",
+    .config = b.path("sqlz.ziggy"),
+    .runtime = .{ .sqlite = true },
+    .codecs = &.{.{ .id = "tier", .module = types, .declaration = "Tier" }},
+});
+```
+
+A configured codec without a build binding, or a binding the file doesn't
+declare, fails the check.
+
+The full field contract is in the
+[configuration design document](https://github.com/westack-it/sqlz/blob/main/docs/configuration.md).

@@ -1,0 +1,34 @@
+.zine_version = "0.14.0",
+.supermd = .{
+    // `#` in content renders as <h2>; the layout owns the page <h1>.
+    .headings_h2 = true,
+    .auto_target_blank = true,
+},
+.site = .simple(.{
+    // Layouts read the name from `$site.title`.
+    .title = "sqlz",
+    // GitHub Pages serves this project site under /sqlz/, so every generated
+    // link carries that prefix.
+    .host_url = "https://westack-it.github.io",
+    .url_path_prefix = "sqlz",
+    .content_dir_path = "content",
+    .layouts_dir_path = "layouts",
+    .assets_dir_path = "assets",
+    .static_assets = [
+        // Files referenced from CSS (url(...)) or by a fixed URL, which Zine
+        // can't discover through $site.asset().
+        "icons",
+        "brand/fonts/geist",
+        "brand/logos/ci/westack-mark-pink.svg",
+    ],
+}),
+// Project links used by the navigation and footer.
+.custom = {
+    "description": "A SQL toolkit for Zig with offline-checked queries, typed bindings and revision-based migrations.",
+    "repo_url": "https://github.com/westack-it/sqlz",
+    "docs_url": "https://github.com/westack-it/sqlz/tree/main/docs",
+    "forum_url": "https://github.com/westack-it/sqlz/issues",
+    "license": "MIT",
+    "org_name": "WeStack",
+    "org_url": "https://westack-it.eu",
+},

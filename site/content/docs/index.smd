@@ -1,0 +1,46 @@
+---
+.title = "Introduction",
+.description = "What sqlz is, how it works and where to start.",
+.date = .date("2026-11-27T00:00:00"),
+.layout = "docs.shtml",
+.custom = { "toc": false },
+---
+
+sqlz is a SQL toolkit for Zig. You keep writing SQL; sqlz checks it at build
+time against a schema rebuilt from your migrations and generates typed Zig
+bindings for it. At runtime it executes those queries on SQLite or
+PostgreSQL through thin adapters over zqlite and pg.zig.
+
+sqlz is not an ORM. It has no model persistence, relationships or query
+builder. Your application keeps control of SQL, connections, transactions,
+allocation and domain types.
+
+# [How it works]($heading.id('how-it-works'))
+
+1. **Migrations are the schema.** The checker replays your migration history
+   into an in-memory catalog for each configured backend.
+2. **Queries are checked on the host.** A normal host program parses each
+   query with `libpg_query` (plus a narrow SQLite layer) and checks names,
+   types and nullability. Nothing is parsed at comptime.
+3. **Bindings are generated into the build cache.** Each query becomes a
+   declaration with a typed params struct, a row struct and methods for its
+   cardinality.
+
+# [Status]($heading.id('status'))
+
+>[]($block.attrs('warning'))
+>sqlz is pre-release. Checking, generated bindings and both runtimes work for
+>the current SQL subset. Running migrations against a database (state,
+>locking, upgrade and downgrade) is not implemented yet.
+
+The [current-status table](https://github.com/westack-it/sqlz/blob/main/docs/README.md#current-implementation-status)
+in the design documents is the authority on what exists today.
+
+# [Where to start]($heading.id('where-to-start'))
+
+- New to sqlz? Start with the [quickstart]($link.page('quickstart')).
+- Setting up a project: [Installation]($link.page('docs/installation')) and
+  [Configuration]($link.page('docs/configuration')).
+- Writing queries: [Checked queries]($link.page('docs/guides/queries')).
+- Looking something up: the [CLI]($link.page('docs/reference/cli')) and
+  [backend reference]($link.page('docs/reference/backends')).

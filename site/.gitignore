@@ -1,0 +1,7 @@
+public/
+.zig-cache/
+zig-out/
+.DS_Store
+# Local checkout of the private WeStack design repo; `mise run brand` copies
+# the assets the site uses from it into assets/brand/, which is committed.
+design/

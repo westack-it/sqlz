@@ -1,0 +1,138 @@
+/* Generated from DESIGN.md by brand-assets/system/scripts/build-tokens.mjs. Do not edit. */
+:root {
+  color-scheme: light;
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 96px;
+  --font-sans: Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-background: #FFFFFF;
+  --color-foreground: #07185E;
+  --color-card: #F5F6FA;
+  --color-card-foreground: #07185E;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #07185E;
+  --color-primary: #C2186F;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #ECEEF6;
+  --color-secondary-foreground: #07185E;
+  --color-muted: #ECEEF6;
+  --color-muted-foreground: #4A5578;
+  --color-accent: #E2E7F6;
+  --color-accent-foreground: #07185E;
+  --color-destructive: #C4320A;
+  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-text: #C2410C;
+  --color-success: #15803D;
+  --color-success-foreground: #FFFFFF;
+  --color-warning: #FBBF24;
+  --color-warning-foreground: #07185E;
+  --color-info: #2F5BEA;
+  --color-info-foreground: #FFFFFF;
+  --color-border: #DCE0EE;
+  --color-input: #7C86AA;
+  --color-ring: #DD2787;
+  --color-sidebar: #F3F5FB;
+  --color-sidebar-accent: #E2E7F6;
+  --color-brand-pink: #DD2787;
+  --color-brand-midnight: #07185E;
+  --color-data-1: #2F5BEA;
+  --color-data-2: #DD2787;
+  --color-data-3: #2B9BE0;
+  --color-data-4: #B7791F;
+  --color-data-5: #7C4DDB;
+  --color-data-6: #0E9384;
+}
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background: #000000;
+  --color-foreground: #FFFFFF;
+  --color-card: #0A1236;
+  --color-card-foreground: #FFFFFF;
+  --color-popover: #0A1236;
+  --color-popover-foreground: #FFFFFF;
+  --color-primary: #C2186F;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #101B4A;
+  --color-secondary-foreground: #FFFFFF;
+  --color-muted: #101B4A;
+  --color-muted-foreground: #BFBFBF;
+  --color-accent: #16245E;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #C4320A;
+  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-text: #FF7A45;
+  --color-success: #15803D;
+  --color-success-foreground: #FFFFFF;
+  --color-warning: #FBBF24;
+  --color-warning-foreground: #000000;
+  --color-info: #3B6CF0;
+  --color-info-foreground: #FFFFFF;
+  --color-border: #1E2A66;
+  --color-input: #56659F;
+  --color-ring: #F06AAE;
+  --color-sidebar: #0A1236;
+  --color-sidebar-accent: #16245E;
+  --color-brand-pink: #DD2787;
+  --color-brand-midnight: #07185E;
+  --color-data-1: #4C7BFF;
+  --color-data-2: #E8489B;
+  --color-data-3: #2F95DB;
+  --color-data-4: #BB7A1A;
+  --color-data-5: #9B7BF0;
+  --color-data-6: #14A898;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"]):not(.light)) {
+    color-scheme: dark;
+    --color-background: #000000;
+    --color-foreground: #FFFFFF;
+    --color-card: #0A1236;
+    --color-card-foreground: #FFFFFF;
+    --color-popover: #0A1236;
+    --color-popover-foreground: #FFFFFF;
+    --color-primary: #C2186F;
+    --color-primary-foreground: #FFFFFF;
+    --color-secondary: #101B4A;
+    --color-secondary-foreground: #FFFFFF;
+    --color-muted: #101B4A;
+    --color-muted-foreground: #BFBFBF;
+    --color-accent: #16245E;
+    --color-accent-foreground: #FFFFFF;
+    --color-destructive: #C4320A;
+    --color-destructive-foreground: #FFFFFF;
+    --color-destructive-text: #FF7A45;
+    --color-success: #15803D;
+    --color-success-foreground: #FFFFFF;
+    --color-warning: #FBBF24;
+    --color-warning-foreground: #000000;
+    --color-info: #3B6CF0;
+    --color-info-foreground: #FFFFFF;
+    --color-border: #1E2A66;
+    --color-input: #56659F;
+    --color-ring: #F06AAE;
+    --color-sidebar: #0A1236;
+    --color-sidebar-accent: #16245E;
+    --color-brand-pink: #DD2787;
+    --color-brand-midnight: #07185E;
+    --color-data-1: #4C7BFF;
+    --color-data-2: #E8489B;
+    --color-data-3: #2F95DB;
+    --color-data-4: #BB7A1A;
+    --color-data-5: #9B7BF0;
+    --color-data-6: #14A898;
+  }
+}
