@@ -2,7 +2,7 @@
 
 The project site for sqlz, built with [Zine](https://zine-ssg.io) and styled
 with the WeStack design system. It is published to GitHub Pages at
-<https://westack-it.github.io/sqlz/> by `.github/workflows/pages.yml` on every
+<https://sqlz.eu> (GitHub Pages with a custom domain) by `.github/workflows/pages.yml` on every
 push to `main` that touches `site/`.
 
 ## Development
@@ -10,7 +10,7 @@ push to `main` that touches `site/`.
 Run these from `site/`:
 
 - `mise install`: installs Zine
-- `mise dev`: runs the Zine dev server with live reload (http://localhost:1990/sqlz/)
+- `mise dev`: runs the Zine dev server with live reload (http://localhost:1990)
 - `mise build`: builds the site into `public/`
 - `mise run brand`: refreshes `assets/brand/` from a local checkout of the
   WeStack design repo in `design/`
@@ -34,11 +34,13 @@ Run these from `site/`:
 - Use `<ctx :if="...">` wrappers in layouts: `:if` on a regular element leaves
   an empty element behind when false.
 
-## Paths
+## Domain
 
-The site is served under `/sqlz/`, set by `.url_path_prefix` in `zine.ziggy`.
-Always link with `$site.page(...)`, `$site.asset(...)` or `$link.page(...)`
-so the prefix is applied; a hardcoded `/...` link breaks on Pages.
+The site is served from the root of `sqlz.eu` (`.host_url` in `zine.ziggy`).
+The custom domain is set in the repository's Pages settings; with an Actions
+deploy, GitHub ignores a `CNAME` file. Link with `$site.page(...)`,
+`$site.asset(...)` or `$link.page(...)` rather than hardcoded paths, so the
+site keeps working if it ever moves under a path prefix.
 
 ## Layout
 

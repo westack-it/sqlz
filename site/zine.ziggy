@@ -7,10 +7,8 @@
 .site = .simple(.{
     // Layouts read the name from `$site.title`.
     .title = "sqlz",
-    // GitHub Pages serves this project site under /sqlz/, so every generated
-    // link carries that prefix.
-    .host_url = "https://westack-it.github.io",
-    .url_path_prefix = "sqlz",
+    // Served from the custom domain at the root, so links need no path prefix.
+    .host_url = "https://sqlz.eu",
     .content_dir_path = "content",
     .layouts_dir_path = "layouts",
     .assets_dir_path = "assets",
