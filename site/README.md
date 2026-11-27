@@ -7,6 +7,10 @@ push to `main` that touches `site/`.
 
 ## Development
 
+From the repository root, `mise run site` builds the site and
+`mise run site:dev` starts the dev server. The repository is a mise monorepo,
+so every task below is also available from anywhere as `mise run //site:<task>`.
+
 Run these from `site/`:
 
 - `mise install`: installs Zine
